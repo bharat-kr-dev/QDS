@@ -1,0 +1,1032 @@
+You are a Senior Product Designer, UX Researcher, Quantum Computing Domain Expert, UI/UX Engineer, and Full-Stack Software Architect.
+
+Your task is to design and build a complete HUMAN-CENTERED web application for a:
+
+"Teleportation-Based Quantum Digital Signature (QDS) Simulator & Threat Detection Platform"
+
+IMPORTANT:
+Do not blindly follow the requirements.
+First understand the target users, their mental model, learning difficulties, workflow, and what they need to see.
+Then design the product around user understanding.
+
+The application must feel like a real professional software product, NOT like a college demo, generic dashboard, or AI-generated template.
+
+==================================================
+1. PRODUCT PURPOSE
+==================================================
+
+The software should allow a user to:
+
+1. Generate Bell states.
+2. Visualize entanglement.
+3. Run quantum teleportation.
+4. Understand how the quantum state moves from sender to receiver.
+5. Show classical communication bits.
+6. Apply Pauli corrections.
+7. Verify the received signature state.
+8. Perform projective measurements.
+9. Measure states using X, Y and Z bases.
+10. Calculate QBER.
+11. Simulate decoy states where appropriate.
+12. Detect possible tampering/noise statistically.
+13. Simulate cyber/quantum attacks.
+14. Compare normal communication vs attacked communication.
+15. Understand WHY an attack is detected.
+
+The application is both:
+- an educational simulator
+- a research/prototyping tool
+- a security-analysis dashboard
+
+==================================================
+2. TARGET USERS
+==================================================
+
+Primary users:
+
+A. Quantum Computing Students
+They need visual explanations and step-by-step execution.
+
+B. Researchers
+They need numerical results, measurement statistics, configurable parameters and reproducibility.
+
+C. Cybersecurity / Cryptography Students
+They need to understand how quantum attacks affect signatures.
+
+D. Faculty / Evaluators
+They need a clear overview of the complete pipeline and results.
+
+The UI must support both beginners and advanced users.
+
+Do NOT overwhelm beginners with equations immediately.
+
+Use progressive disclosure:
+Beginner → Visual explanation → Detailed mathematics → Raw data
+
+==================================================
+3. CORE USER JOURNEY
+==================================================
+
+Design the primary workflow as:
+
+Create/Select Signature State
+        ↓
+Generate Bell Pair
+        ↓
+Entangle Sender & Receiver
+        ↓
+Run Quantum Teleportation
+        ↓
+Bell Measurement
+        ↓
+Classical Bits
+        ↓
+Pauli Correction
+        ↓
+Receiver State
+        ↓
+Projective Measurement
+        ↓
+Threat Detection
+        ↓
+QBER Analysis
+        ↓
+Attack Simulation
+        ↓
+Security Result
+        ↓
+Detailed Explanation
+
+The user should always know:
+
+"Where am I?"
+"What just happened?"
+"Why did it happen?"
+"What should I do next?"
+
+==================================================
+4. DESIGN PHILOSOPHY
+==================================================
+
+Use a HUMAN-FIRST design.
+
+Do not make everything a card.
+
+Avoid:
+- excessive gradients
+- excessive glassmorphism
+- meaningless glowing effects
+- huge rounded cards everywhere
+- fake AI aesthetics
+- unnecessary animations
+- dense dashboards
+- tiny unreadable text
+
+Use:
+- clear hierarchy
+- meaningful whitespace
+- strong typography
+- understandable labels
+- contextual explanations
+- progressive disclosure
+- visual cause-and-effect
+- interactive diagrams
+- status indicators
+- accessible colors
+- keyboard accessibility
+
+The software should feel like:
+
+"Quantum laboratory + security analysis workstation"
+
+rather than:
+
+"Crypto trading dashboard"
+
+==================================================
+5. VISUAL LANGUAGE
+==================================================
+
+Create a sophisticated scientific interface.
+
+Visual inspiration:
+- modern scientific instruments
+- quantum computing control systems
+- research laboratories
+- cybersecurity consoles
+- modern developer tools
+
+Use a restrained visual system.
+
+Recommended:
+- neutral/light or dark scientific workspace
+- one strong accent color
+- semantic colors for success/warning/danger
+- monospaced typography for quantum states and numerical values
+- normal readable typography for explanations
+
+Use diagrams wherever diagrams improve understanding.
+
+If an illustration, diagram, icon, scientific visual, or background asset is needed and cannot be represented well using UI components/SVG/CSS, generate it automatically.
+
+Do NOT use random stock images.
+
+==================================================
+6. MAIN APPLICATION STRUCTURE
+==================================================
+
+Create the following navigation:
+
+1. Overview
+2. Quantum Lab
+3. Teleportation
+4. Signature Verification
+5. Threat Detection
+6. Attack Simulator
+7. Experiments
+8. Results & Analytics
+9. Theory / Learn
+10. Settings
+
+Sidebar should show the current stage.
+
+The top bar should show:
+
+- Experiment name
+- Simulation status
+- Quantum backend/simulator status
+- Run ID
+- Save experiment
+- Reset
+
+==================================================
+7. OVERVIEW PAGE
+==================================================
+
+Design a visual system overview.
+
+Show:
+
+Sender
+  ↓
+Signature State
+  ↓
+Bell Pair
+  ↓
+Teleportation
+  ↓
+Classical Bits
+  ↓
+Pauli Correction
+  ↓
+Receiver
+  ↓
+Verification
+  ↓
+Threat Detection
+  ↓
+Security Result
+
+Make this interactive.
+
+When the user clicks a stage:
+- explain it
+- show relevant inputs
+- show outputs
+- show mathematical representation
+- show current state
+
+Also show:
+
+- Current QBER
+- Verification status
+- Attack status
+- Noise level
+- Last experiment
+- Simulation health
+
+==================================================
+8. QUANTUM LAB
+==================================================
+
+Create an interactive quantum workspace.
+
+Features:
+
+- Qubit state selector
+- Custom state input
+- Bloch sphere visualization
+- Ket notation
+- Probability amplitudes
+- X/Y/Z basis
+- Measurement controls
+
+Example:
+
+|ψ⟩ = α|0⟩ + β|1⟩
+
+Show both:
+- mathematical representation
+- human explanation
+
+Example explanation:
+
+"This qubit has a 70% probability of being measured as |0⟩ and a 30% probability of being measured as |1⟩."
+
+Do not force users to understand equations before using the simulator.
+
+==================================================
+9. BELL STATE GENERATOR
+==================================================
+
+Create a dedicated Bell State module.
+
+Allow:
+
+|Φ+⟩
+|Φ-⟩
+|Ψ+⟩
+|Ψ-⟩
+
+For every state show:
+
+- Circuit representation
+- Ket notation
+- Measurement probabilities
+- Entanglement visualization
+- Correlation explanation
+
+Include:
+
+"Why does this matter?"
+
+Explain in simple language.
+
+Allow user to generate a Bell pair.
+
+Show:
+
+Alice Qubit
+       ╲
+        ENTANGLEMENT
+       ╱
+Bob Qubit
+
+==================================================
+10. QUANTUM TELEPORTATION
+==================================================
+
+This is the most important interactive module.
+
+Build a step-by-step simulator.
+
+Steps:
+
+STEP 1
+Prepare signature state.
+
+STEP 2
+Create Bell pair.
+
+STEP 3
+Entangle Alice and Bob.
+
+STEP 4
+Bell-state measurement.
+
+STEP 5
+Generate classical bits.
+
+STEP 6
+Send classical bits.
+
+STEP 7
+Apply Pauli correction.
+
+STEP 8
+Recover receiver state.
+
+STEP 9
+Verify state fidelity.
+
+At every step show:
+
+- current circuit
+- qubit states
+- mathematical state
+- classical bits
+- explanation
+
+Include:
+
+Play
+Pause
+Next Step
+Previous Step
+Restart
+Run Automatically
+
+Do NOT animate excessively.
+
+Animation should explain the process.
+
+==================================================
+11. PAULI CORRECTION
+==================================================
+
+Show the classical measurement result:
+
+00 → I
+01 → X
+10 → Z
+11 → XZ
+
+Make the correction visual.
+
+Example:
+
+Received:
+01
+
+Required correction:
+X
+
+Apply:
+X|ψ⟩
+
+Then show:
+
+Before correction
+After correction
+
+Allow users to manually apply the correction.
+
+==================================================
+12. SIGNATURE VERIFICATION ENGINE
+==================================================
+
+Create a dedicated verification screen.
+
+Show:
+
+Expected state
+Received state
+Fidelity
+Measurement statistics
+Basis used
+Verification result
+
+Verification should be visually obvious.
+
+Possible results:
+
+VALID
+SUSPICIOUS
+INVALID
+TAMPERED / ANOMALOUS
+
+Never claim "attack confirmed" based only on QBER.
+
+Use scientifically careful language:
+
+"Possible channel disturbance detected."
+
+==================================================
+13. PROJECTIVE MEASUREMENT
+==================================================
+
+Allow measurement in:
+
+Z basis
+X basis
+Y basis
+
+Show:
+
+- measurement probabilities
+- number of shots
+- observed counts
+- expected counts
+- histogram
+- error percentage
+
+Allow:
+
+Shots:
+100
+1,000
+10,000
+Custom
+
+Show how increasing shots improves statistical confidence.
+
+==================================================
+14. THREAT DETECTION
+==================================================
+
+Create a security analysis workspace.
+
+Two major mechanisms:
+
+A. Pauli Eigenstate / MUB Checks
+
+Measure across:
+
+X
+Y
+Z
+
+Compare:
+
+Expected distribution
+vs
+Observed distribution
+
+Show deviations clearly.
+
+B. Statistical Detection
+
+Calculate:
+
+QBER
+
+Formula:
+
+QBER =
+errors / total compared bits
+
+Allow configurable threshold.
+
+Example:
+
+QBER = 2.1%
+Threshold = 5%
+
+Status:
+NORMAL
+
+If:
+
+QBER = 8.4%
+Threshold = 5%
+
+Status:
+ANOMALOUS
+
+Explain:
+
+"The observed error rate exceeds the configured threshold. This may indicate channel noise, implementation errors, or possible tampering."
+
+Do not automatically equate QBER with an attacker.
+
+==================================================
+15. DECOY STATES
+==================================================
+
+If decoy states are implemented, clearly label them as a security technique and explain their purpose.
+
+Show:
+
+Signal states
+Decoy states
+Observed errors
+Loss statistics
+Estimated channel behavior
+
+Allow users to enable/disable decoy-state analysis.
+
+==================================================
+16. ATTACK SIMULATOR
+==================================================
+
+Create a dedicated Attack Lab.
+
+Available scenarios:
+
+1. Normal Channel
+2. Intercept-Resend
+3. Forgery
+4. Replay
+5. Phase Shift / Phase Noise
+6. Optional configurable noise
+
+For each attack:
+
+Show:
+
+Before attack
+Attack action
+After attack
+Measurement change
+QBER change
+Detection result
+
+==================================================
+17. INTERCEPT-RESEND
+==================================================
+
+Create a visual simulation:
+
+Sender
+  ↓
+Quantum State
+  ↓
+Attacker
+  ↓
+Measurement
+  ↓
+State Re-preparation
+  ↓
+Receiver
+
+Allow attacker basis selection:
+
+X
+Y
+Z
+Random
+
+Then calculate the effect.
+
+Show:
+
+Expected state
+Observed state
+Error rate
+Detection status
+
+Explain:
+
+"The attacker measured the state in an incompatible basis, which can disturb the quantum state."
+
+==================================================
+18. FORGERY SIMULATION
+==================================================
+
+Create a forgery experiment.
+
+Show:
+
+Legitimate signature
+Forged signature
+Verification statistics
+
+Explain why the forged state does or does not pass verification.
+
+Use appropriate quantum-state distinguishability/security logic.
+
+Do not invent cryptographic guarantees that the implemented simulator cannot prove.
+
+==================================================
+19. REPLAY ATTACK
+==================================================
+
+Simulate:
+
+Valid signature/message
+        ↓
+Captured
+        ↓
+Replayed later
+
+Show how protocol-level freshness/authentication mechanisms detect replay.
+
+Make it clear that replay protection is partly a protocol/software-layer property, not solely a quantum-physics property.
+
+==================================================
+20. PHASE SHIFT / NOISE
+==================================================
+
+Allow configurable phase shift:
+
+θ
+
+Show:
+
+Original state
+Phase-shifted state
+Measurement distribution
+QBER
+
+Add a noise slider.
+
+Example:
+
+Noise:
+0%
+1%
+5%
+10%
+20%
+
+Show how increasing noise changes the result.
+
+==================================================
+21. RESULTS & ANALYTICS
+==================================================
+
+Create a research-grade experiment dashboard.
+
+Show:
+
+- QBER
+- Fidelity
+- Detection rate
+- False positive rate
+- False negative rate
+- Measurement counts
+- Attack type
+- Noise level
+- Number of shots
+- Basis distribution
+- Experiment duration
+
+Provide:
+
+Run Experiment
+Compare Experiments
+Export Results
+
+Use charts only where they communicate something meaningful.
+
+==================================================
+22. EXPERIMENT COMPARISON
+==================================================
+
+Allow:
+
+Normal vs Intercept-Resend
+Normal vs Noise
+Normal vs Forgery
+Normal vs Replay
+Normal vs Phase Shift
+
+Comparison view:
+
+Metric | Normal | Attack | Difference
+
+Example:
+
+QBER:
+Normal: 1.2%
+Attack: 7.8%
+Difference: +6.6%
+
+Use clear visual interpretation.
+
+==================================================
+23. THEORY / LEARNING MODE
+==================================================
+
+Create an educational section.
+
+Topics:
+
+1. Qubit
+2. Superposition
+3. Measurement
+4. Born Rule
+5. Entanglement
+6. Bell States
+7. Pauli Operators
+8. Quantum Teleportation
+9. No-Cloning Theorem
+10. Mutually Unbiased Bases
+11. QBER
+12. Decoy States
+13. Quantum Noise
+14. Intercept-Resend Attack
+15. Quantum Digital Signatures
+
+Each topic should have:
+
+Simple explanation
+Visual
+Equation
+Example
+"Why it matters in this simulator"
+
+Use beginner-friendly language.
+
+==================================================
+24. HUMAN-CENTERED UX
+==================================================
+
+At every important interaction provide contextual help.
+
+Examples:
+
+"What is happening?"
+
+"Why am I seeing this?"
+
+"What does this number mean?"
+
+"Is this good or bad?"
+
+"What's the next step?"
+
+Avoid unexplained technical terminology.
+
+Use tooltips and expandable explanations.
+
+Never force users to leave the page to understand a term.
+
+==================================================
+25. ERROR HANDLING
+==================================================
+
+Errors must be human-readable.
+
+Bad:
+
+"QuantumBackendException: state_vector_invalid"
+
+Good:
+
+"The quantum state could not be simulated because the probability amplitudes are not normalized."
+
+Show:
+
+What happened
+Why it happened
+How to fix it
+
+==================================================
+26. ACCESSIBILITY
+==================================================
+
+Follow WCAG principles.
+
+Ensure:
+
+- keyboard navigation
+- readable contrast
+- accessible labels
+- screen-reader-friendly controls
+- do not rely only on color
+- meaningful icons
+- reduced motion support
+
+==================================================
+27. TECHNICAL ARCHITECTURE
+==================================================
+
+Use a modular architecture.
+
+Frontend:
+- React / Next.js
+- TypeScript
+- modern component architecture
+- responsive design
+
+Quantum simulation:
+Create a clean abstraction layer.
+
+Example:
+
+QuantumEngine
+ ├── Qubit
+ ├── BellState
+ ├── Gate
+ ├── Measurement
+ ├── Teleportation
+ ├── Noise
+ └── AttackSimulator
+
+Security:
+
+ThreatDetectionEngine
+ ├── MUBAnalyzer
+ ├── QBERCalculator
+ ├── DecoyAnalyzer
+ └── StatisticalAnalyzer
+
+Verification:
+
+SignatureVerificationEngine
+ ├── PauliCorrection
+ ├── MeasurementVerifier
+ ├── FidelityCalculator
+ └── ResultClassifier
+
+Experiments:
+
+ExperimentManager
+ ├── Run
+ ├── Save
+ ├── Compare
+ └── Export
+
+Keep quantum logic independent from UI.
+
+==================================================
+28. DATA MODEL
+==================================================
+
+Design data structures for:
+
+Experiment
+QuantumState
+BellState
+TeleportationRun
+MeasurementResult
+AttackScenario
+ThreatDetectionResult
+VerificationResult
+QBERResult
+
+Store:
+
+timestamp
+experiment ID
+configuration
+input state
+Bell state
+measurement results
+attack parameters
+noise parameters
+QBER
+fidelity
+verification result
+detection result
+
+==================================================
+29. VISUALIZATION REQUIREMENTS
+==================================================
+
+Use:
+
+- Bloch sphere
+- quantum circuit
+- state-vector display
+- measurement histogram
+- QBER chart
+- expected vs observed distribution
+- attack flow diagram
+- experiment comparison chart
+- security status indicators
+
+Prefer SVG/canvas/programmatic visualizations when appropriate.
+
+If a custom visual asset is genuinely needed, generate it automatically.
+
+Never use an image merely for decoration.
+
+==================================================
+30. RESPONSIVENESS
+==================================================
+
+Desktop:
+Full research workstation.
+
+Tablet:
+Condensed analysis layout.
+
+Mobile:
+Focus on:
+- experiment status
+- key metrics
+- step-by-step simulation
+- results
+
+Do not simply shrink desktop UI.
+
+==================================================
+31. PRODUCT PERSONALITY
+==================================================
+
+The product should feel:
+
+Precise
+Scientific
+Trustworthy
+Educational
+Human
+Professional
+Interactive
+
+Not:
+
+Flashy
+Crypto-bro
+Overly futuristic
+Generic SaaS
+AI gimmicky
+
+==================================================
+32. IMPORTANT SCIENTIFIC ACCURACY RULES
+==================================================
+
+Do not call every concept a theorem.
+
+Correct terminology:
+
+No-Cloning → theorem
+Born Rule → rule/postulate-related formalism
+Bell states → quantum states
+Entanglement → quantum phenomenon
+Teleportation → quantum protocol
+Pauli X/Z → operators
+MUB → measurement concept
+QBER → metric
+Decoy states → security technique
+Intercept-resend → attack model
+Phase shift → quantum operation/noise model
+Decoherence → physical phenomenon
+
+Never claim:
+
+"High QBER proves an attacker."
+
+Instead:
+
+"High QBER indicates anomalous error/channel behavior and may indicate noise, implementation issues, or tampering."
+
+Never claim:
+
+"Teleportation sends matter."
+
+Explain that quantum information/state is transferred using entanglement and classical communication.
+
+==================================================
+33. AI DESIGN BEHAVIOR
+==================================================
+
+Before writing UI code:
+
+1. Analyze the user journey.
+2. Identify confusing concepts.
+3. Create an information architecture.
+4. Create the design system.
+5. Decide which information should be visible immediately.
+6. Decide what should be progressive disclosure.
+7. Design the most important screens.
+8. Create interaction states.
+9. Then implement.
+
+If requirements conflict with usability, prioritize user comprehension while preserving the scientific intent.
+
+If an image/diagram is needed:
+generate/create the appropriate visual automatically.
+
+Do not ask the user to manually design every screen.
+
+==================================================
+34. FINAL QUALITY BAR
+==================================================
+
+The final application should feel like a real product that could be demonstrated to:
+
+- university faculty
+- quantum computing researchers
+- cybersecurity researchers
+- software engineers
+
+A first-time user should be able to understand the main workflow without prior QDS expertise.
+
+The most important design principle:
+
+"Show the user what happened, why it happened, and what it means."
+
+Build the complete experience around this principle.
