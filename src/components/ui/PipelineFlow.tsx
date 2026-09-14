@@ -2,6 +2,8 @@
 
 import React, { useState } from 'react';
 import { useQuantum } from '../../lib/experiments/experiment-store';
+import 'katex/dist/katex.min.css';
+import { BlockMath } from 'react-katex';
 import {
   IconSignature,
   IconEntangle,
@@ -287,8 +289,8 @@ export const PipelineFlow: React.FC = () => {
             <div className="text-[11px] font-mono text-ink-muted uppercase font-semibold tracking-wider">
               Mathematical Formalism
             </div>
-            <div className="font-mono text-sm text-quantum bg-well border border-rule px-3 py-2.5 overflow-x-auto">
-              {selectedStage.details.mathForm}
+            <div className="font-mono text-sm text-quantum bg-well border border-rule px-3 py-2.5 overflow-x-auto text-center">
+              <BlockMath math={selectedStage.details.mathForm} />
             </div>
           </div>
 
