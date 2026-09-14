@@ -1,96 +1,160 @@
 @import "tailwindcss";
 
-:root {
-  --background: #060913;
-  --foreground: #f1f5f9;
-  --primary-glow: radial-gradient(rgba(14, 165, 233, 0.15), rgba(15, 23, 42, 0));
-  --accent-glow: radial-gradient(rgba(16, 185, 129, 0.12), rgba(15, 23, 42, 0));
+/*
+  QDS — design tokens.
+
+  Direction: a laboratory instrument, not a dashboard. Structure is carried by
+  hairlines and alignment, never by shadow, blur or gradient. Colour is
+  semantic: every hue names a distinct information channel, so a colour on
+  screen always means something specific.
+*/
+
+@theme {
+  /* Surfaces — cool instrument enamel, layered by value alone. */
+  --color-bench: #edeef1;
+  --color-face: #ffffff;
+  --color-well: #e4e6ea;
+
+  /* Ink */
+  --color-ink: #14161a;
+  --color-ink-muted: #5c626b;
+  --color-ink-faint: #8a9099;
+
+  /* Structure */
+  --color-rule: #d2d5da;
+  --color-rule-strong: #b4b9c1;
+
+  /* Quantum channel — the primary accent. */
+  --color-quantum: #1a3fbf;
+  --color-quantum-tint: #e7ebfa;
+
+  /* Classical channel — deliberately a second, distinct hue. */
+  --color-classical: #0e7c86;
+  --color-classical-tint: #e0eff0;
+
+  /* Verdicts */
+  --color-pass: #0f7a4e;
+  --color-pass-tint: #e2f1ea;
+  --color-warn: #8f5e0a;
+  --color-warn-tint: #f6eedd;
+  --color-adversary: #c62d1f;
+  --color-adversary-tint: #fae7e4;
+
+  /* Type */
+  --font-sans: var(--font-archivo), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-fragment), ui-monospace, "SFMono-Regular", Menlo, monospace;
+
+  --text-micro: 0.6875rem;
+  --text-micro--line-height: 1.35;
+  --text-tiny: 0.75rem;
+  --text-tiny--line-height: 1.4;
+  --text-small: 0.8125rem;
+  --text-small--line-height: 1.45;
+  --text-base: 0.9375rem;
+  --text-base--line-height: 1.55;
+  --text-lead: 1.0625rem;
+  --text-lead--line-height: 1.6;
+  --text-title: 1.25rem;
+  --text-title--line-height: 1.25;
+  --text-display: 1.75rem;
+  --text-display--line-height: 1.12;
+
+  /* A single, deliberate radius — controls only. Panels are square. */
+  --radius-instrument: 2px;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-}
-
-body {
-  background-color: #060913;
-  background-image: 
-    radial-gradient(at 0% 0%, rgba(14, 165, 233, 0.08) 0px, transparent 50%),
-    radial-gradient(at 100% 0%, rgba(99, 102, 241, 0.07) 0px, transparent 50%),
-    radial-gradient(at 50% 100%, rgba(16, 185, 129, 0.05) 0px, transparent 50%),
-    linear-gradient(to right, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
-  background-size: 100% 100%, 100% 100%, 100% 100%, 32px 32px, 32px 32px;
-  color: #f1f5f9;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  overflow-x: hidden;
-}
-
-/* Custom Sleek Scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: #090d16;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #1e293b;
-  border-radius: 9999px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #334155;
-}
-
-/* Custom Glow & Glass Utilities */
-.glass-panel {
-  background: rgba(11, 17, 32, 0.75);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-}
-
-.glass-panel-hover {
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.glass-panel-hover:hover {
-  border-color: rgba(56, 189, 248, 0.3);
-  box-shadow: 0 12px 40px 0 rgba(14, 165, 233, 0.12);
-  transform: translateY(-2px);
-}
-
-.glow-cyan {
-  box-shadow: 0 0 25px -5px rgba(6, 182, 212, 0.35);
-}
-
-.glow-emerald {
-  box-shadow: 0 0 25px -5px rgba(16, 185, 129, 0.35);
-}
-
-.glow-rose {
-  box-shadow: 0 0 25px -5px rgba(244, 63, 94, 0.35);
-}
-
-/* Scientific Monospace Accents */
-.font-mono {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-}
-
-/* Pulse animation for active wires */
-@keyframes quantum-pulse {
-  0%, 100% {
-    opacity: 0.4;
+@layer base {
+  html {
+    color-scheme: light;
+    -webkit-text-size-adjust: 100%;
   }
-  50% {
-    opacity: 1;
+
+  body {
+    background-color: var(--color-bench);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: var(--text-base);
+    line-height: 1.55;
+    font-synthesis-weight: none;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Any number that sits in a column aligns with its neighbours. */
+  .tnum,
+  [data-numeric] {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-quantum);
+    outline-offset: 1px;
+  }
+
+  ::selection {
+    background-color: #cdd6f7;
+    color: var(--color-ink);
+  }
+
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--color-bench);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-rule-strong);
+    border: 3px solid var(--color-bench);
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-ink-faint);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 }
 
-.animate-quantum {
-  animation: quantum-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+@layer components {
+  /* A panel is a bounded region on the instrument face: 1px rule, no shadow. */
+  .panel {
+    background-color: var(--color-face);
+    border: 1px solid var(--color-rule);
+  }
+
+  /* A well is an inset region — for inputs, raw data, and readout strips. */
+  .well {
+    background-color: var(--color-well);
+    border: 1px solid var(--color-rule);
+  }
+
+  /* Section label: sentence case, no tracked-out capitals, no decoration. */
+  .label {
+    font-size: var(--text-tiny);
+    font-weight: 500;
+    color: var(--color-ink-muted);
+  }
+
+  /* The one motion in the app: a stage that is currently executing. */
+  .stage-active {
+    animation: stage-pulse 1.8s ease-in-out infinite;
+  }
+
+  @keyframes stage-pulse {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.45;
+    }
+  }
 }

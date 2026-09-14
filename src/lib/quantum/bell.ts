@@ -1,121 +1,111 @@
 import { Complex } from './complex';
 import { StateVector } from './statevector';
-import { BellStateInfo, BellStateKey } from './types';
+import { BELL_STATE_NOTES } from '../../content/protocol';
+import type { BellStateInfo, BellStateKey } from './types';
 
-const invSqrt2 = 1 / Math.SQRT2;
+const INV_SQRT2 = 1 / Math.SQRT2;
 
-export const BELL_STATES: Record<BellStateKey, BellStateInfo> = {
+/**
+ * The amplitudes of each Bell state, written out over |00⟩, |01⟩, |10⟩, |11⟩.
+ *
+ * Everything else about these states — concurrence, entropy, correlations,
+ * the CHSH parameter — is computed from these four numbers by `describe()`.
+ * An earlier version of this file stored those values as literals alongside
+ * the amplitudes, which meant the displayed figure and the underlying state
+ * could drift apart without anything failing. Deriving them removes that
+ * possibility.
+ */
+const BELL_AMPLITUDES: Record<BellStateKey, [Complex, Complex, Complex, Complex]> = {
+  PHI_PLUS: [
+    new Complex(INV_SQRT2, 0),
+    Complex.ZERO,
+    Complex.ZERO,
+    new Complex(INV_SQRT2, 0),
+  ],
+  PHI_MINUS: [
+    new Complex(INV_SQRT2, 0),
+    Complex.ZERO,
+    Complex.ZERO,
+    new Complex(-INV_SQRT2, 0),
+  ],
+  PSI_PLUS: [
+    Complex.ZERO,
+    new Complex(INV_SQRT2, 0),
+    new Complex(INV_SQRT2, 0),
+    Complex.ZERO,
+  ],
+  PSI_MINUS: [
+    Complex.ZERO,
+    new Complex(INV_SQRT2, 0),
+    new Complex(-INV_SQRT2, 0),
+    Complex.ZERO,
+  ],
+};
+
+const BELL_FORMULAS: Record<BellStateKey, { symbol: string; formula: string; preparation: string }> = {
   PHI_PLUS: {
-    key: 'PHI_PLUS',
     symbol: '|Φ⁺⟩',
-    name: 'Bell State Phi-Plus',
-    formula: '|Φ⁺⟩ = (|00⟩ + |11⟩) / √2',
-    circuitDescription: 'Hadamard on Qubit A → CNOT with control Qubit A and target Qubit B',
-    stateVector: [
-      { re: invSqrt2, im: 0 },
-      { re: 0, im: 0 },
-      { re: 0, im: 0 },
-      { re: invSqrt2, im: 0 },
-    ],
-    concurrence: 1.0,
-    entanglementEntropy: 1.0,
-    correlations: {
-      zz: 1.0,  // Perfect correlated outcomes in Z basis
-      xx: 1.0,  // Perfect correlated outcomes in X basis
-      yy: -1.0, // Anti-correlated in Y basis
-    },
-    explanation:
-      'Maximally entangled state where both qubits are always measured in the exact same state (|00⟩ or |11⟩ in Z-basis) with 50% probability each.',
-    whyItMatters:
-      'Standard EPR channel resource used in Bennett-Brassard quantum teleportation. Enables Alice and Bob to share non-local correlations without sending quantum information.',
+    formula: '( |00⟩ + |11⟩ ) / √2',
+    preparation: 'H on A, then CNOT from A to B',
   },
   PHI_MINUS: {
-    key: 'PHI_MINUS',
     symbol: '|Φ⁻⟩',
-    name: 'Bell State Phi-Minus',
-    formula: '|Φ⁻⟩ = (|00⟩ - |11⟩) / √2',
-    circuitDescription: 'Pauli-Z on Qubit A → Hadamard on Qubit A → CNOT (A → B)',
-    stateVector: [
-      { re: invSqrt2, im: 0 },
-      { re: 0, im: 0 },
-      { re: 0, im: 0 },
-      { re: -invSqrt2, im: 0 },
-    ],
-    concurrence: 1.0,
-    entanglementEntropy: 1.0,
-    correlations: {
-      zz: 1.0,
-      xx: -1.0,
-      yy: 1.0,
-    },
-    explanation:
-      'Maximally entangled state with a relative π phase between the |00⟩ and |11⟩ components.',
-    whyItMatters:
-      'Differentiates from |Φ⁺⟩ by a single Pauli-Z phase flip. Useful for demonstrating phase-flip errors and syndrome detection.',
+    formula: '( |00⟩ − |11⟩ ) / √2',
+    preparation: 'Z on A, then H on A, then CNOT from A to B',
   },
   PSI_PLUS: {
-    key: 'PSI_PLUS',
     symbol: '|Ψ⁺⟩',
-    name: 'Bell State Psi-Plus',
-    formula: '|Ψ⁺⟩ = (|01⟩ + |10⟩) / √2',
-    circuitDescription: 'Pauli-X on Qubit B → Hadamard on Qubit A → CNOT (A → B)',
-    stateVector: [
-      { re: 0, im: 0 },
-      { re: invSqrt2, im: 0 },
-      { re: invSqrt2, im: 0 },
-      { re: 0, im: 0 },
-    ],
-    concurrence: 1.0,
-    entanglementEntropy: 1.0,
-    correlations: {
-      zz: -1.0, // Perfectly anti-correlated in Z basis (|01> or |10>)
-      xx: 1.0,
-      yy: 1.0,
-    },
-    explanation:
-      'Maximally entangled anti-correlated state: if Alice measures 0, Bob always gets 1, and vice-versa.',
-    whyItMatters:
-      'Used in symmetric quantum key distribution protocols and anti-correlated quantum signature schemes.',
+    formula: '( |01⟩ + |10⟩ ) / √2',
+    preparation: 'X on B, then H on A, then CNOT from A to B',
   },
   PSI_MINUS: {
-    key: 'PSI_MINUS',
     symbol: '|Ψ⁻⟩',
-    name: 'Bell State Psi-Minus (Singlet)',
-    formula: '|Ψ⁻⟩ = (|01⟩ - |10⟩) / √2',
-    circuitDescription: 'Pauli-X and Pauli-Z on Qubit B → Hadamard on Qubit A → CNOT (A → B)',
-    stateVector: [
-      { re: 0, im: 0 },
-      { re: invSqrt2, im: 0 },
-      { re: -invSqrt2, im: 0 },
-      { re: 0, im: 0 },
-    ],
-    concurrence: 1.0,
-    entanglementEntropy: 1.0,
-    correlations: {
-      zz: -1.0,
-      xx: -1.0,
-      yy: -1.0, // Invariant under all rotation bases (rotational singlet)
-    },
-    explanation:
-      'The legendary singlet state with total spin zero. It is completely spherically symmetric and invariant under identical unitary rotations.',
-    whyItMatters:
-      'Crucial for reference-frame-independent quantum communication and foundational tests of Bell inequality violation (CHSH $S = 2\\sqrt{2} \\approx 2.828$).',
+    formula: '( |01⟩ − |10⟩ ) / √2',
+    preparation: 'X and Z on B, then H on A, then CNOT from A to B',
   },
 };
 
-export function getBellStateVector(key: BellStateKey): StateVector {
-  const info = BELL_STATES[key];
-  return new StateVector(info.stateVector.map((c) => Complex.from(c)));
-}
+function describe(key: BellStateKey): BellStateInfo {
+  const state = new StateVector(BELL_AMPLITUDES[key]);
+  const correlations = state.correlationMatrix();
+  const chsh = state.chsh();
 
-export function calculateCHSH(key: BellStateKey): { sValue: number; bellViolation: boolean; maxClassicalBound: number; tsirelsonBound: number } {
-  // In an ideal Bell state, the CHSH parameter reaches Tsirelson's bound 2*sqrt(2) = 2.828
-  // Classical local hidden variable bound is |S| <= 2
-  const sValue = 2 * Math.SQRT2;
   return {
-    sValue: Number(sValue.toFixed(4)),
-    bellViolation: true,
-    maxClassicalBound: 2.0,
-    tsirelsonBound: Number((2 * Math.SQRT2).toFixed(4)),
+    key,
+    symbol: BELL_FORMULAS[key].symbol,
+    formula: BELL_FORMULAS[key].formula,
+    preparation: BELL_FORMULAS[key].preparation,
+    amplitudes: BELL_AMPLITUDES[key].map((c) => c.toObject()) as BellStateInfo['amplitudes'],
+    concurrence: Number(state.concurrence().toFixed(6)),
+    entanglementEntropy: Number(state.entanglementEntropy().toFixed(6)),
+    correlations: {
+      zz: Number(correlations[2][2].toFixed(6)),
+      xx: Number(correlations[0][0].toFixed(6)),
+      yy: Number(correlations[1][1].toFixed(6)),
+    },
+    chsh: chsh.s,
+    violatesBell: chsh.violatesBell,
   };
 }
+
+/** All four Bell states, fully described. Computed once at module load. */
+export const BELL_STATES: Record<BellStateKey, BellStateInfo> = {
+  PHI_PLUS: describe('PHI_PLUS'),
+  PHI_MINUS: describe('PHI_MINUS'),
+  PSI_PLUS: describe('PSI_PLUS'),
+  PSI_MINUS: describe('PSI_MINUS'),
+};
+
+export const BELL_STATE_KEYS: readonly BellStateKey[] = [
+  'PHI_PLUS',
+  'PHI_MINUS',
+  'PSI_PLUS',
+  'PSI_MINUS',
+];
+
+export function getBellStateVector(key: BellStateKey): StateVector {
+  return new StateVector(BELL_AMPLITUDES[key]);
+}
+
+/** Prose for the state selector. Kept beside the physics it describes. */
+export { BELL_STATE_NOTES };

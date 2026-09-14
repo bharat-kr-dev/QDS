@@ -6,65 +6,62 @@ import { BlochSphere } from '../../components/ui/BlochSphere';
 import { HumanContextHelper } from '../../components/ui/HumanContextHelper';
 import { AttackType, BasisType } from '../../lib/quantum/types';
 import {
-  Skull,
-  ShieldAlert,
-  Flame,
-  Radio,
-  Sliders,
-  RotateCcw,
-  AlertTriangle,
-  CheckCircle,
-} from 'lucide-react';
+  IconThreat,
+  IconReset,
+  IconSettings,
+  IconVerify,
+  IconInfo,
+} from '../../components/icons/Icons';
 
 export default function AttackSimulatorPage() {
   const {
     inputState,
     receivedState,
-    attackConfig,
-    setAttackConfig,
+    attack,
+    setAttack,
     resetAttack,
-    verificationResult,
+    verification,
   } = useQuantum();
 
-  const originalBloch = inputState.getSingleQubitBloch();
-  const disturbedBloch = receivedState.getSingleQubitBloch();
+  const originalBloch = inputState.getBloch();
+  const disturbedBloch = receivedState.getBloch();
 
-  const attackScenarios: { type: AttackType; label: string; desc: string; icon: string }[] = [
+  const attackScenarios: { type: AttackType; label: string; desc: string; icon: React.ReactNode }[] = [
     {
       type: 'none',
       label: '1. Clean Channel (No Attack)',
       desc: 'Standard uncompromised quantum teleportation channel.',
-      icon: '🛡️',
+      icon: <IconVerify size={24} className="text-pass" />,
     },
     {
       type: 'intercept_resend',
       label: '2. Intercept-Resend',
       desc: 'Adversary intercepts, measures in basis, and re-prepares state.',
-      icon: '👁️',
+      icon: <IconThreat size={24} className="text-adversary" />,
     },
     {
       type: 'forgery',
       label: '3. Quantum Forgery',
       desc: 'Counterfeit signature generated without authentic basis choices.',
-      icon: '🎭',
+      icon: <IconThreat size={24} className="text-adversary" />,
     },
     {
       type: 'replay',
       label: '4. Replay Attack',
       desc: 'Adversary re-injects stale valid signature packets with expired nonce.',
-      icon: '🔁',
+      icon: <IconThreat size={24} className="text-adversary" />,
     },
     {
       type: 'phase_shift',
       label: '5. Phase Drift / Rz(θ)',
       desc: 'Continuous channel optical phase rotation along Z-axis.',
-      icon: '🌀',
+      icon: <IconThreat size={24} className="text-warn" />,
     },
     {
       type: 'noise',
       label: '6. Thermal / Depolarizing Noise',
       desc: 'Ambient channel decoherence and stochastic thermal fluctuation.',
-      icon: '📶',
+      icon: <IconThreat size={24} className="text-warn" />,
     },
   ];
 
@@ -72,10 +69,8 @@ export default function AttackSimulatorPage() {
     if (type === 'none') {
       resetAttack();
     } else {
-      setAttackConfig({
+      setAttack({
         type,
-        enabled: true,
-        name: attackScenarios.find((s) => s.type === type)?.label || type,
       });
     }
   };
@@ -83,25 +78,25 @@ export default function AttackSimulatorPage() {
   return (
     <div className="space-y-8">
       {/* Page Header */}
-      <div className="bg-slate-950 border border-slate-800 rounded-2xl p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="panel p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-rose-950/80 border border-rose-800 text-[11px] font-mono text-rose-400 mb-1.5">
-            <Flame className="w-3.5 h-3.5" />
+          <div className="inline-flex items-center gap-2 px-2.5 py-0.5 border border-adversary bg-adversary-tint text-[10px] font-mono font-bold text-adversary uppercase tracking-wider mb-2">
+            <IconThreat size={12} />
             Adversary Threat & Attack Simulation Lab
           </div>
-          <h1 className="text-xl lg:text-2xl font-bold text-white tracking-tight">
+          <h1 className="text-xl lg:text-2xl font-bold text-ink tracking-tight uppercase font-sans">
             Red Team Quantum Attack Simulator
           </h1>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-ink-muted mt-1">
             Inject real-time quantum attacks and observe state collapse, wavefunction disturbance, and QBER spikes.
           </p>
         </div>
 
         <button
           onClick={resetAttack}
-          className="flex items-center gap-2 px-3.5 py-2 bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-300 rounded-xl text-xs font-semibold transition-colors"
+          className="flex items-center gap-2 px-3.5 py-2 bg-face hover:bg-well border border-rule text-ink uppercase tracking-wider font-bold text-xs cursor-pointer transition-colors"
         >
-          <RotateCcw className="w-3.5 h-3.5" />
+          <IconReset size={14} />
           <span>Reset to Clean Channel</span>
         </button>
       </div>
@@ -109,49 +104,47 @@ export default function AttackSimulatorPage() {
       {/* Scenario Selection Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
         {attackScenarios.map((scen) => {
-          const isSelected =
-            (attackConfig.type === scen.type && attackConfig.enabled) ||
-            (!attackConfig.enabled && scen.type === 'none');
+          const isSelected = attack.type === scen.type;
 
           return (
             <button
               key={scen.type}
               onClick={() => handleSelectAttack(scen.type)}
-              className={`p-4 rounded-xl border text-left flex flex-col justify-between transition-all cursor-pointer ${
+              className={`p-4 border text-left flex flex-col justify-between transition-colors cursor-pointer ${
                 isSelected
-                  ? 'bg-rose-950/60 border-rose-500 ring-2 ring-rose-500/40 shadow-lg'
-                  : 'bg-slate-950 border-slate-800 text-slate-300 hover:bg-slate-900'
+                  ? 'bg-adversary-tint border-adversary ring-1 ring-adversary/50'
+                  : 'bg-face border-rule hover:bg-well hover:border-ink-faint'
               }`}
             >
               <div className="flex items-center justify-between mb-2">
-                <span className="text-2xl">{scen.icon}</span>
+                <span className="flex items-center justify-center">{scen.icon}</span>
                 {isSelected && (
-                  <span className="text-[10px] font-mono text-rose-400 bg-rose-950 px-2 py-0.5 rounded border border-rose-800 font-bold">
+                  <span className="text-[10px] font-mono text-adversary bg-adversary-tint px-2 py-0.5 border border-adversary font-bold uppercase tracking-wider">
                     Active Scenario
                   </span>
                 )}
               </div>
-              <div className="text-sm font-bold text-white mb-1">{scen.label}</div>
-              <div className="text-xs text-slate-400 leading-relaxed">{scen.desc}</div>
+              <div className="text-sm font-bold text-ink mb-1">{scen.label}</div>
+              <div className="text-xs text-ink-muted leading-relaxed font-medium">{scen.desc}</div>
             </button>
           );
         })}
       </div>
 
       {/* Active Attack Parameters Configuration */}
-      {attackConfig.enabled && attackConfig.type !== 'none' && (
-        <div className="bg-slate-950 border border-rose-900/60 rounded-2xl p-6 shadow-xl space-y-4">
-          <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
-            <div className="flex items-center gap-2 text-sm font-bold text-rose-300">
-              <Sliders className="w-4 h-4" />
-              <span>Configure Attack Parameters ({attackConfig.name})</span>
+      {attack.type !== 'none' && (
+        <div className="panel p-6 space-y-4 bg-bench border-t-4 border-t-adversary">
+          <div className="flex items-center justify-between border-b border-rule pb-3">
+            <div className="flex items-center gap-2 text-sm font-bold text-adversary uppercase tracking-wider">
+              <IconSettings size={16} />
+              <span>Configure Attack Parameters ({attack.type})</span>
             </div>
           </div>
 
           {/* Intercept-Resend Basis Control */}
-          {attackConfig.type === 'intercept_resend' && (
+          {attack.type === 'intercept_resend' && (
             <div className="space-y-3">
-              <span className="text-xs font-mono text-slate-300">
+              <span className="text-xs font-mono font-bold text-ink-muted uppercase tracking-wider">
                 Attacker (Eve) Measurement Basis:
               </span>
               <div className="grid grid-cols-4 gap-2">
@@ -159,17 +152,17 @@ export default function AttackSimulatorPage() {
                   <button
                     key={b}
                     onClick={() =>
-                      setAttackConfig({
+                      setAttack({
                         interceptBasis: b as BasisType | 'RANDOM',
                       })
                     }
-                    className={`py-2 px-3 rounded-lg text-xs font-mono border transition-all ${
-                      attackConfig.interceptBasis === b
-                        ? 'bg-rose-600 border-rose-400 text-white font-bold'
-                        : 'bg-slate-900 border-slate-800 text-slate-300 hover:bg-slate-800'
+                    className={`py-2 px-3 text-xs font-mono font-bold border transition-colors cursor-pointer uppercase tracking-wider ${
+                      attack.interceptBasis === b
+                        ? 'bg-adversary border-adversary text-white'
+                        : 'bg-face border-rule text-ink hover:bg-well'
                     }`}
                   >
-                    {b === 'RANDOM' ? '🎲 Random Basis' : `${b}-Basis`}
+                    {b === 'RANDOM' ? '? Random' : `${b}-Basis`}
                   </button>
                 ))}
               </div>
@@ -177,9 +170,9 @@ export default function AttackSimulatorPage() {
           )}
 
           {/* Forgery Strategy Control */}
-          {attackConfig.type === 'forgery' && (
+          {attack.type === 'forgery' && (
             <div className="space-y-3">
-              <span className="text-xs font-mono text-slate-300">Forgery Strategy:</span>
+              <span className="text-xs font-mono font-bold text-ink-muted uppercase tracking-wider">Forgery Strategy:</span>
               <div className="grid grid-cols-3 gap-2">
                 {(
                   [
@@ -190,11 +183,11 @@ export default function AttackSimulatorPage() {
                 ).map((strat) => (
                   <button
                     key={strat.id}
-                    onClick={() => setAttackConfig({ forgeryStrategy: strat.id })}
-                    className={`py-2 px-3 rounded-lg text-xs font-mono border transition-all ${
-                      attackConfig.forgeryStrategy === strat.id
-                        ? 'bg-rose-600 border-rose-400 text-white font-bold'
-                        : 'bg-slate-900 border-slate-800 text-slate-300 hover:bg-slate-800'
+                    onClick={() => setAttack({ forgeryStrategy: strat.id as any })}
+                    className={`py-2 px-3 text-xs font-mono font-bold border transition-colors cursor-pointer uppercase tracking-wider ${
+                      attack.forgeryStrategy === strat.id
+                        ? 'bg-adversary border-adversary text-white'
+                        : 'bg-face border-rule text-ink hover:bg-well'
                     }`}
                   >
                     {strat.label}
@@ -205,70 +198,70 @@ export default function AttackSimulatorPage() {
           )}
 
           {/* Replay Parameters */}
-          {attackConfig.type === 'replay' && (
+          {attack.type === 'replay' && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <div className="flex justify-between text-xs font-mono text-slate-300">
+              <div className="space-y-1.5 p-3 bg-face border border-rule">
+                <div className="flex justify-between text-xs font-mono font-bold text-ink-muted uppercase tracking-wider">
                   <span>Replay Delay:</span>
-                  <span className="text-rose-400 font-bold">{attackConfig.replayDelaySeconds} seconds</span>
+                  <span className="text-adversary font-bold">{attack.replayDelaySeconds} seconds</span>
                 </div>
                 <input
                   type="range"
                   min="10"
                   max="300"
                   step="10"
-                  value={attackConfig.replayDelaySeconds || 45}
+                  value={attack.replayDelaySeconds || 45}
                   onChange={(e) =>
-                    setAttackConfig({ replayDelaySeconds: Number(e.target.value) })
+                    setAttack({ replayDelaySeconds: Number(e.target.value) })
                   }
-                  className="w-full accent-rose-500 cursor-pointer"
+                  className="w-full cursor-pointer"
                 />
               </div>
 
-              <div className="flex items-center justify-between bg-slate-900 border border-slate-800 p-3 rounded-xl">
-                <span className="text-xs font-mono text-slate-300">Simulate Stale Nonce Flag:</span>
+              <div className="flex items-center justify-between bg-face border border-rule p-3">
+                <span className="text-xs font-mono font-bold text-ink-muted uppercase tracking-wider">Simulate Stale Nonce Flag:</span>
                 <button
-                  onClick={() => setAttackConfig({ nonceValid: !attackConfig.nonceValid })}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold border transition-colors ${
-                    !attackConfig.nonceValid
-                      ? 'bg-rose-950 text-rose-300 border-rose-800'
-                      : 'bg-emerald-950 text-emerald-300 border-emerald-800'
+                  onClick={() => setAttack({ nonceValid: !attack.nonceValid })}
+                  className={`px-3 py-1.5 text-xs font-mono font-bold border transition-colors uppercase tracking-wider cursor-pointer ${
+                    !attack.nonceValid
+                      ? 'bg-adversary-tint text-adversary border-adversary'
+                      : 'bg-pass-tint text-pass border-pass'
                   }`}
                 >
-                  {attackConfig.nonceValid ? 'Fresh Nonce' : 'Expired Nonce (Flagged)'}
+                  {attack.nonceValid ? 'Fresh Nonce' : 'Expired Nonce (Flagged)'}
                 </button>
               </div>
             </div>
           )}
 
           {/* Phase Shift Slider */}
-          {attackConfig.type === 'phase_shift' && (
-            <div className="space-y-1.5">
-              <div className="flex justify-between text-xs font-mono text-slate-300">
+          {attack.type === 'phase_shift' && (
+            <div className="space-y-1.5 p-3 bg-face border border-rule">
+              <div className="flex justify-between text-xs font-mono font-bold text-ink-muted uppercase tracking-wider">
                 <span>Phase Shift Angle θ (Unitary Rz):</span>
-                <span className="text-rose-400 font-bold">{attackConfig.phaseAngleDeg}°</span>
+                <span className="text-warn font-bold">{attack.phaseAngleDeg}°</span>
               </div>
               <input
                 type="range"
                 min="0"
                 max="180"
                 step="5"
-                value={attackConfig.phaseAngleDeg || 45}
+                value={attack.phaseAngleDeg || 45}
                 onChange={(e) =>
-                  setAttackConfig({ phaseAngleDeg: Number(e.target.value) })
+                  setAttack({ phaseAngleDeg: Number(e.target.value) })
                 }
-                className="w-full accent-rose-500 cursor-pointer"
+                className="w-full cursor-pointer"
               />
             </div>
           )}
 
           {/* Generic Noise Slider */}
-          {attackConfig.type === 'noise' && (
-            <div className="space-y-1.5">
-              <div className="flex justify-between text-xs font-mono text-slate-300">
+          {attack.type === 'noise' && (
+            <div className="space-y-1.5 p-3 bg-face border border-rule">
+              <div className="flex justify-between text-xs font-mono font-bold text-ink-muted uppercase tracking-wider">
                 <span>Channel Noise Level:</span>
-                <span className="text-rose-400 font-bold">
-                  {((attackConfig.noiseLevel || 0.15) * 100).toFixed(0)}%
+                <span className="text-warn font-bold">
+                  {((attack.noiseLevel || 0.15) * 100).toFixed(0)}%
                 </span>
               </div>
               <input
@@ -276,11 +269,11 @@ export default function AttackSimulatorPage() {
                 min="0.0"
                 max="0.5"
                 step="0.02"
-                value={attackConfig.noiseLevel || 0.15}
+                value={attack.noiseLevel || 0.15}
                 onChange={(e) =>
-                  setAttackConfig({ noiseLevel: Number(e.target.value) })
+                  setAttack({ noiseLevel: Number(e.target.value) })
                 }
-                className="w-full accent-rose-500 cursor-pointer"
+                className="w-full cursor-pointer"
               />
             </div>
           )}
@@ -290,72 +283,72 @@ export default function AttackSimulatorPage() {
       {/* Before vs After Wavefunction Disturbance Comparison */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Original State */}
-        <div className="lg:col-span-6 bg-slate-950 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-3 flex flex-col items-center">
+        <div className="lg:col-span-6 panel p-6 space-y-3 flex flex-col items-center">
           <div className="w-full flex items-center justify-between">
-            <span className="text-xs font-mono text-sky-400 uppercase tracking-wider">
+            <span className="text-[11px] font-mono font-bold text-quantum uppercase tracking-wider">
               Before Attack: |ψ_in⟩
             </span>
-            <span className="text-[10px] font-mono text-slate-400">Authentic Qubit</span>
+            <span className="text-[10px] font-mono text-ink-faint">Authentic Qubit</span>
           </div>
 
           <BlochSphere bloch={originalBloch} size={250} label="|ψ_orig⟩" interactive={false} />
 
-          <div className="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 font-mono text-xs text-sky-300 overflow-x-auto text-center">
-            {inputState.getKetString()}
+          <div className="w-full bg-well border border-rule p-3 font-mono text-xs font-bold text-quantum overflow-x-auto text-center">
+            {inputState.toKet(3)}
           </div>
         </div>
 
         {/* Perturbed State */}
-        <div className="lg:col-span-6 bg-slate-950 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-3 flex flex-col items-center">
+        <div className="lg:col-span-6 panel p-6 space-y-3 flex flex-col items-center">
           <div className="w-full flex items-center justify-between">
-            <span className="text-xs font-mono text-rose-400 uppercase tracking-wider">
+            <span className="text-[11px] font-mono font-bold text-adversary uppercase tracking-wider">
               After Attack: |ψ_disturbed⟩
             </span>
-            <span className="text-[10px] font-mono text-rose-400 font-bold">
-              {attackConfig.enabled ? 'Disturbed Wavefunction' : 'Undisturbed'}
+            <span className="text-[10px] font-mono font-bold text-adversary">
+              {attack.type !== 'none' ? 'Disturbed Wavefunction' : 'Undisturbed'}
             </span>
           </div>
 
           <BlochSphere bloch={disturbedBloch} size={250} label="|ψ_dist⟩" interactive={false} />
 
-          <div className="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 font-mono text-xs text-rose-300 overflow-x-auto text-center">
-            {receivedState.getKetString()}
+          <div className="w-full bg-well border border-rule p-3 font-mono text-xs font-bold text-adversary overflow-x-auto text-center">
+            {receivedState.toKet(3)}
           </div>
         </div>
       </div>
 
       {/* Impact Telemetry Matrix */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-slate-950 border border-slate-800 rounded-xl p-4 shadow-md space-y-1">
-          <div className="text-[11px] font-mono text-slate-400 uppercase">Induced QBER</div>
+        <div className="panel p-4 space-y-1">
+          <div className="text-[11px] font-mono font-bold text-ink-muted uppercase tracking-wider">Induced QBER</div>
           <div
-            className={`text-2xl font-bold font-mono ${
-              verificationResult.qber > 5.0 ? 'text-rose-400' : 'text-emerald-400'
+            className={`text-2xl font-bold font-mono tnum ${
+              verification.qber > 5.0 ? 'text-adversary' : 'text-pass'
             }`}
           >
-            {verificationResult.qber}%
+            {verification.qber}%
           </div>
-          <div className="text-[10px] text-slate-400">Errors per 100 compared bits</div>
+          <div className="text-[10px] font-medium text-ink-faint">Errors per 100 compared bits</div>
         </div>
 
-        <div className="bg-slate-950 border border-slate-800 rounded-xl p-4 shadow-md space-y-1">
-          <div className="text-[11px] font-mono text-slate-400 uppercase">State Overlap Fidelity</div>
-          <div className="text-2xl font-bold font-mono text-slate-200">
-            {(verificationResult.fidelity * 100).toFixed(1)}%
+        <div className="panel p-4 space-y-1">
+          <div className="text-[11px] font-mono font-bold text-ink-muted uppercase tracking-wider">State Overlap Fidelity</div>
+          <div className="text-2xl font-bold font-mono tnum text-ink">
+            {(verification.fidelity * 100).toFixed(1)}%
           </div>
-          <div className="text-[10px] text-slate-400">Target: ≥ 95.0% for acceptance</div>
+          <div className="text-[10px] font-medium text-ink-faint">Target: ≥ 95.0% for acceptance</div>
         </div>
 
-        <div className="bg-slate-950 border border-slate-800 rounded-xl p-4 shadow-md space-y-1">
-          <div className="text-[11px] font-mono text-slate-400 uppercase">Tampering Status</div>
+        <div className="panel p-4 space-y-1">
+          <div className="text-[11px] font-mono font-bold text-ink-muted uppercase tracking-wider">Tampering Status</div>
           <div
-            className={`text-base font-bold font-mono ${
-              verificationResult.verdict === 'VALID' ? 'text-emerald-400' : 'text-rose-400'
+            className={`text-base font-bold font-mono uppercase ${
+              verification.verdict === 'VALID' ? 'text-pass' : 'text-adversary'
             }`}
           >
-            {verificationResult.verdict}
+            {verification.verdict}
           </div>
-          <div className="text-[10px] text-slate-400">Cryptographic non-repudiation</div>
+          <div className="text-[10px] font-medium text-ink-faint">Cryptographic non-repudiation</div>
         </div>
       </div>
 

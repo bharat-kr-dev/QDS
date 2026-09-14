@@ -1,7 +1,11 @@
 'use client';
 
 import React, { useState } from 'react';
-import { BookOpen, Sparkles, ChevronRight, Atom, Shield, Key } from 'lucide-react';
+import {
+  IconLearn,
+  IconInfo,
+  IconChevronRight,
+} from '../../components/icons/Icons';
 
 interface TheoryTopic {
   id: string;
@@ -179,22 +183,22 @@ export default function LearnPage() {
   return (
     <div className="space-y-8">
       {/* Page Header */}
-      <div className="bg-slate-950 border border-slate-800 rounded-2xl p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="panel p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-indigo-950/80 border border-indigo-800 text-[11px] font-mono text-indigo-400 mb-1.5">
-            <BookOpen className="w-3.5 h-3.5" />
+          <div className="inline-flex items-center gap-2 px-2.5 py-0.5 border border-quantum bg-quantum-tint text-[10px] font-mono font-bold text-quantum uppercase tracking-wider mb-2">
+            <IconLearn size={12} />
             15 Interactive Quantum & Cryptographic Modules
           </div>
-          <h1 className="text-xl lg:text-2xl font-bold text-white tracking-tight">
+          <h1 className="text-xl lg:text-2xl font-bold text-ink tracking-tight uppercase font-sans">
             Theory & Learning Knowledge Base
           </h1>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-ink-muted mt-1 font-medium">
             Learn the foundational physics, mathematical formalisms, and security proofs behind teleportation-based QDS.
           </p>
         </div>
 
         {/* Category Filter Pills */}
-        <div className="flex flex-wrap items-center gap-1.5 text-xs font-mono">
+        <div className="flex flex-wrap items-center gap-1.5 text-xs font-mono font-bold uppercase tracking-wider">
           {[
             { id: 'all', label: 'All Topics' },
             { id: 'foundations', label: 'Physics' },
@@ -205,10 +209,10 @@ export default function LearnPage() {
             <button
               key={cat.id}
               onClick={() => setCategoryFilter(cat.id)}
-              className={`px-3 py-1.5 rounded-lg border transition-colors ${
+              className={`px-3 py-1.5 border transition-colors cursor-pointer ${
                 categoryFilter === cat.id
-                  ? 'bg-indigo-600 border-indigo-500 text-white font-bold'
-                  : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200'
+                  ? 'bg-quantum border-quantum text-white'
+                  : 'bg-face border-rule text-ink hover:bg-well'
               }`}
             >
               {cat.label}
@@ -220,12 +224,12 @@ export default function LearnPage() {
       {/* Main Grid: Topic Index & Detailed Interactive Lesson */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left: Topic List */}
-        <div className="lg:col-span-4 bg-slate-950 border border-slate-800 rounded-2xl p-4 shadow-xl space-y-2 max-h-[680px] overflow-y-auto">
-          <div className="text-[11px] font-mono text-slate-400 uppercase tracking-wider px-2 py-1">
+        <div className="lg:col-span-4 panel p-4 space-y-2 max-h-[680px] overflow-y-auto">
+          <div className="text-[10px] font-mono font-bold text-ink-muted uppercase tracking-wider px-2 py-1 border-b border-rule pb-2">
             Topic Curriculum ({filteredTopics.length})
           </div>
 
-          <div className="space-y-1">
+          <div className="space-y-1 pt-2">
             {filteredTopics.map((topic) => {
               const isSelected = topic.id === selectedTopicId;
 
@@ -233,17 +237,16 @@ export default function LearnPage() {
                 <button
                   key={topic.id}
                   onClick={() => setSelectedTopicId(topic.id)}
-                  className={`w-full p-3 rounded-xl text-left flex items-center justify-between transition-all ${
+                  className={`w-full p-3 text-left flex items-center justify-between transition-colors cursor-pointer border ${
                     isSelected
-                      ? 'bg-indigo-950/80 border border-indigo-500 text-indigo-200 font-bold shadow-md'
-                      : 'bg-slate-900/50 hover:bg-slate-900 text-slate-300 border border-transparent'
+                      ? 'bg-quantum-tint border-quantum text-quantum font-bold'
+                      : 'bg-face border-transparent hover:border-rule text-ink hover:bg-well'
                   }`}
                 >
-                  <span className="text-xs truncate">{topic.title}</span>
-                  <ChevronRight
-                    className={`w-4 h-4 shrink-0 ${
-                      isSelected ? 'text-indigo-400' : 'text-slate-500'
-                    }`}
+                  <span className="text-xs truncate uppercase tracking-wider font-bold">{topic.title}</span>
+                  <IconChevronRight
+                    size={14}
+                    className={isSelected ? 'text-quantum' : 'text-ink-muted'}
                   />
                 </button>
               );
@@ -252,51 +255,51 @@ export default function LearnPage() {
         </div>
 
         {/* Right: Detailed Topic View with Progressive Disclosure */}
-        <div className="lg:col-span-8 bg-slate-950 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-6">
-          <div className="space-y-1 border-b border-slate-800/80 pb-4">
-            <div className="text-xs font-mono text-indigo-400 uppercase tracking-wider">
+        <div className="lg:col-span-8 panel p-6 space-y-6">
+          <div className="space-y-1 border-b border-rule pb-4">
+            <div className="text-[10px] font-mono font-bold text-quantum uppercase tracking-wider">
               Selected Curriculum Module
             </div>
-            <h2 className="text-xl font-bold text-white">{selectedTopic.title}</h2>
+            <h2 className="text-xl font-bold text-ink uppercase tracking-wider font-sans">{selectedTopic.title}</h2>
           </div>
 
           {/* 1. Simple Plain-English Explanation */}
           <div className="space-y-1.5">
-            <span className="text-xs font-mono text-slate-400 uppercase">
+            <span className="text-[10px] font-mono font-bold text-ink-muted uppercase tracking-wider">
               1. Intuitive Explanation
             </span>
-            <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 text-xs sm:text-sm text-slate-200 leading-relaxed">
+            <div className="bg-well border border-rule p-4 text-xs sm:text-sm text-ink font-medium leading-relaxed">
               {selectedTopic.simpleExplanation}
             </div>
           </div>
 
           {/* 2. Mathematical Formalism */}
           <div className="space-y-1.5">
-            <span className="text-xs font-mono text-slate-400 uppercase">
+            <span className="text-[10px] font-mono font-bold text-ink-muted uppercase tracking-wider">
               2. Mathematical Representation
             </span>
-            <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 font-mono text-sm sm:text-base text-sky-300 overflow-x-auto">
+            <div className="bg-face border border-rule p-4 font-mono text-sm sm:text-base font-bold text-quantum overflow-x-auto">
               {selectedTopic.equation}
             </div>
           </div>
 
           {/* 3. Concrete Physical Example */}
           <div className="space-y-1.5">
-            <span className="text-xs font-mono text-slate-400 uppercase">
+            <span className="text-[10px] font-mono font-bold text-ink-muted uppercase tracking-wider">
               3. Physical / Real-World Example
             </span>
-            <div className="bg-slate-900/70 border border-slate-800 rounded-xl p-3.5 text-xs text-slate-300">
+            <div className="bg-well border border-rule p-4 text-xs text-ink font-medium">
               {selectedTopic.example}
             </div>
           </div>
 
           {/* 4. Why it matters in this simulator */}
-          <div className="bg-emerald-950/40 border border-emerald-800/80 rounded-xl p-4 space-y-1 text-xs">
-            <div className="flex items-center gap-2 text-emerald-400 font-bold font-mono">
-              <Sparkles className="w-3.5 h-3.5" />
+          <div className="bg-pass-tint border border-pass p-4 space-y-2 text-xs">
+            <div className="flex items-center gap-2 text-pass font-bold font-mono uppercase tracking-wider text-[10px]">
+              <IconInfo size={14} />
               Why It Matters in This Simulator:
             </div>
-            <p className="text-emerald-200 leading-relaxed">{selectedTopic.whyItMatters}</p>
+            <p className="text-ink font-medium leading-relaxed">{selectedTopic.whyItMatters}</p>
           </div>
         </div>
       </div>

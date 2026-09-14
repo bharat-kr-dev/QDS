@@ -5,52 +5,49 @@ import { useQuantum } from '../../lib/experiments/experiment-store';
 import { BlochSphere } from '../../components/ui/BlochSphere';
 import { HumanContextHelper } from '../../components/ui/HumanContextHelper';
 import {
-  CheckCircle2,
-  AlertTriangle,
-  XCircle,
-  ShieldCheck,
-  RotateCw,
-  Cpu,
-  Key,
-  Sliders,
-} from 'lucide-react';
+  IconCheck,
+  IconIntrusion,
+  IconCross,
+  IconVerify,
+  IconRestart,
+} from '../../components/icons/Icons';
 
 export default function VerificationPage() {
   const {
     inputState,
     receivedState,
-    teleportResult,
+    teleportation,
     manualCorrection,
     setManualCorrection,
-    autoCorrectionMode,
-    setAutoCorrectionMode,
-    verificationResult,
+    autoCorrection,
+    setAutoCorrection,
+    verification,
   } = useQuantum();
 
-  const expectedBloch = inputState.getSingleQubitBloch();
-  const receivedBloch = receivedState.getSingleQubitBloch();
-  const classicalBits = teleportResult.classicalBits;
+  const expectedBloch = inputState.getBloch();
+  const receivedBloch = receivedState.getBloch();
+  const classicalBits = teleportation.classicalBits;
   const bitString = `${classicalBits[0]}${classicalBits[1]}`;
 
   const pauliOptions: ('I' | 'X' | 'Z' | 'XZ')[] = ['I', 'X', 'Z', 'XZ'];
 
   const verdictBadge =
-    verificationResult.verdict === 'VALID'
+    verification.verdict === 'VALID'
       ? {
-          bg: 'bg-emerald-950/80 border-emerald-800 text-emerald-300',
-          icon: CheckCircle2,
-          color: 'text-emerald-400',
+          bg: 'bg-pass-tint border-pass text-pass',
+          icon: IconCheck,
+          color: 'text-pass',
         }
-      : verificationResult.verdict === 'SUSPICIOUS'
+      : verification.verdict === 'SUSPICIOUS'
       ? {
-          bg: 'bg-amber-950/80 border-amber-800 text-amber-300',
-          icon: AlertTriangle,
-          color: 'text-amber-400',
+          bg: 'bg-warn-tint border-warn text-warn',
+          icon: IconIntrusion,
+          color: 'text-warn',
         }
       : {
-          bg: 'bg-rose-950/80 border-rose-800 text-rose-300',
-          icon: XCircle,
-          color: 'text-rose-400',
+          bg: 'bg-adversary-tint border-adversary text-adversary',
+          icon: IconCross,
+          color: 'text-adversary',
         };
 
   const VerdictIcon = verdictBadge.icon;
@@ -58,63 +55,63 @@ export default function VerificationPage() {
   return (
     <div className="space-y-8">
       {/* Page Header */}
-      <div className="bg-slate-950 border border-slate-800 rounded-2xl p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="panel p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-emerald-950/80 border border-emerald-800 text-[11px] font-mono text-emerald-400 mb-1.5">
-            <CheckCircle2 className="w-3.5 h-3.5" />
+          <div className="inline-flex items-center gap-2 px-2.5 py-0.5 border border-pass bg-pass-tint text-[10px] font-mono font-bold text-pass uppercase tracking-wider mb-2">
+            <IconCheck size={12} />
             Signature Verification & Pauli Correction Engine
           </div>
-          <h1 className="text-xl lg:text-2xl font-bold text-white tracking-tight">
+          <h1 className="text-xl lg:text-2xl font-bold text-ink tracking-tight uppercase font-sans">
             Bob’s Quantum Signature Verification Station
           </h1>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-ink-muted mt-1 font-medium">
             Apply Pauli unitary corrections, compute quantum overlap fidelity, and test cryptographic authenticity.
           </p>
         </div>
 
         {/* Big Verdict Badge */}
-        <div className={`flex items-center gap-3 px-4 py-2.5 rounded-xl border ${verdictBadge.bg}`}>
-          <VerdictIcon className={`w-5 h-5 ${verdictBadge.color}`} />
+        <div className={`flex items-center gap-3 px-4 py-2.5 border ${verdictBadge.bg}`}>
+          <VerdictIcon size={20} className={verdictBadge.color} />
           <div>
-            <div className="text-[10px] font-mono uppercase text-slate-400">Cryptographic Verdict</div>
+            <div className={`text-[10px] font-mono font-bold uppercase tracking-wider ${verdictBadge.color}`}>Cryptographic Verdict</div>
             <div className="text-base font-bold font-mono tracking-wider">
-              {verificationResult.verdict}
+              {verification.verdict}
             </div>
           </div>
         </div>
       </div>
 
       {/* Pauli Correction Workbench */}
-      <div className="bg-slate-950 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800/80 pb-3">
+      <div className="panel p-6 space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-rule pb-3">
           <div>
-            <h3 className="text-sm font-bold text-white flex items-center gap-2">
-              <RotateCw className="w-4 h-4 text-sky-400" />
+            <h3 className="text-sm font-bold text-ink uppercase tracking-wider flex items-center gap-2">
+              <IconRestart size={16} className="text-quantum" />
               Pauli Unitary Correction Workbench
             </h3>
-            <p className="text-xs text-slate-400">
-              Classical syndrome bits received: <strong className="font-mono text-amber-400">[{classicalBits[0]}, {classicalBits[1]}]</strong> → Required Unitary: <strong className="font-mono text-emerald-400">{teleportResult.pauliCorrectionRequired}</strong>
+            <p className="text-xs text-ink-muted font-medium mt-1">
+              Classical syndrome bits received: <strong className="font-mono text-warn">[{classicalBits[0]}, {classicalBits[1]}]</strong> → Required Unitary: <strong className="font-mono text-pass">{teleportation.pauliCorrectionRequired}</strong>
             </p>
           </div>
 
           {/* Mode Switch: Auto vs Manual */}
-          <div className="flex items-center gap-2 bg-slate-900 border border-slate-800 p-1 rounded-xl text-xs font-mono">
+          <div className="flex items-center gap-2 bg-face border border-rule p-1 text-xs font-mono font-bold uppercase tracking-wider">
             <button
-              onClick={() => setAutoCorrectionMode(true)}
-              className={`px-3 py-1.5 rounded-lg transition-colors ${
-                autoCorrectionMode
-                  ? 'bg-sky-600 text-white font-bold'
-                  : 'text-slate-400 hover:text-slate-200'
+              onClick={() => setAutoCorrection(true)}
+              className={`px-3 py-1.5 transition-colors cursor-pointer ${
+                autoCorrection
+                  ? 'bg-quantum text-white'
+                  : 'text-ink-muted hover:text-ink'
               }`}
             >
               Auto Correction (Protocol)
             </button>
             <button
-              onClick={() => setAutoCorrectionMode(false)}
-              className={`px-3 py-1.5 rounded-lg transition-colors ${
-                !autoCorrectionMode
-                  ? 'bg-amber-600 text-white font-bold'
-                  : 'text-slate-400 hover:text-slate-200'
+              onClick={() => setAutoCorrection(false)}
+              className={`px-3 py-1.5 transition-colors cursor-pointer ${
+                !autoCorrection
+                  ? 'bg-warn text-white'
+                  : 'text-ink-muted hover:text-ink'
               }`}
             >
               Manual Operator Selection
@@ -123,34 +120,34 @@ export default function VerificationPage() {
         </div>
 
         {/* Pauli Options Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
           {pauliOptions.map((op) => {
             const isApplied =
-              (autoCorrectionMode ? teleportResult.pauliCorrectionRequired : manualCorrection) === op;
-            const isTheoreticallyCorrect = teleportResult.pauliCorrectionRequired === op;
+              (autoCorrection ? teleportation.correctionSchedule[bitString] : manualCorrection) === op;
+            const isTheoreticallyCorrect = teleportation.correctionSchedule[bitString] === op;
 
             return (
               <button
                 key={op}
-                disabled={autoCorrectionMode}
+                disabled={autoCorrection}
                 onClick={() => setManualCorrection(op)}
-                className={`p-3.5 rounded-xl border text-left flex flex-col justify-between transition-all ${
+                className={`p-3.5 border text-left flex flex-col justify-between transition-colors cursor-pointer disabled:cursor-not-allowed ${
                   isApplied
                     ? isTheoreticallyCorrect
-                      ? 'bg-emerald-950/80 border-emerald-500 text-emerald-200 ring-2 ring-emerald-500/40'
-                      : 'bg-rose-950/80 border-rose-500 text-rose-200 ring-2 ring-rose-500/40'
-                    : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:bg-slate-900 disabled:opacity-50'
+                      ? 'bg-pass-tint border-pass text-pass'
+                      : 'bg-adversary-tint border-adversary text-adversary'
+                    : 'bg-bench border-rule text-ink-muted hover:bg-face disabled:opacity-50'
                 }`}
               >
                 <div className="flex justify-between items-center mb-1">
-                  <span className="text-base font-mono font-bold">Pauli-{op}</span>
+                  <span className={`text-base font-mono font-bold ${isApplied ? '' : 'text-ink'}`}>Pauli-{op}</span>
                   {isTheoreticallyCorrect && (
-                    <span className="text-[10px] font-mono text-emerald-400 bg-emerald-950 px-1.5 py-0.5 rounded border border-emerald-800">
+                    <span className="text-[9px] font-mono font-bold uppercase tracking-wider text-pass bg-pass-tint px-1.5 py-0.5 border border-pass">
                       Required
                     </span>
                   )}
                 </div>
-                <div className="text-[11px] text-slate-400 font-mono">
+                <div className={`text-[10px] font-mono font-bold uppercase tracking-wider ${isApplied ? '' : 'text-ink-muted'}`}>
                   {op === 'I'
                     ? 'Identity (No-Op)'
                     : op === 'X'
@@ -168,34 +165,34 @@ export default function VerificationPage() {
       {/* Side-by-Side State Tomography Comparison */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left: Expected State */}
-        <div className="lg:col-span-6 bg-slate-950 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-3 flex flex-col items-center">
-          <div className="w-full flex items-center justify-between">
-            <span className="text-xs font-mono text-sky-400 uppercase tracking-wider">
+        <div className="lg:col-span-6 panel p-6 space-y-3 flex flex-col items-center bg-bench">
+          <div className="w-full flex items-center justify-between border-b border-rule pb-2">
+            <span className="text-[11px] font-mono font-bold text-quantum uppercase tracking-wider">
               Expected State |ψ_in⟩ (Alice)
             </span>
-            <span className="text-[10px] font-mono text-slate-400">Authentic Target</span>
+            <span className="text-[9px] font-mono font-bold text-ink-muted uppercase tracking-wider">Authentic Target</span>
           </div>
 
           <BlochSphere bloch={expectedBloch} size={250} label="|ψ_exp⟩" interactive={false} />
 
-          <div className="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 font-mono text-xs text-sky-300 overflow-x-auto text-center">
-            {inputState.getKetString()}
+          <div className="w-full bg-face border border-rule p-3 font-mono text-xs font-bold text-quantum overflow-x-auto text-center mt-4">
+            {inputState.toKet(3)}
           </div>
         </div>
 
         {/* Right: Received Corrected State */}
-        <div className="lg:col-span-6 bg-slate-950 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-3 flex flex-col items-center">
-          <div className="w-full flex items-center justify-between">
-            <span className="text-xs font-mono text-emerald-400 uppercase tracking-wider">
+        <div className="lg:col-span-6 panel p-6 space-y-3 flex flex-col items-center bg-bench">
+          <div className="w-full flex items-center justify-between border-b border-rule pb-2">
+            <span className="text-[11px] font-mono font-bold text-pass uppercase tracking-wider">
               Received State |ψ_out⟩ (Bob)
             </span>
-            <span className="text-[10px] font-mono text-slate-400">After Unitary Correction</span>
+            <span className="text-[9px] font-mono font-bold text-ink-muted uppercase tracking-wider">After Unitary Correction</span>
           </div>
 
           <BlochSphere bloch={receivedBloch} size={250} label="|ψ_rec⟩" interactive={false} />
 
-          <div className="w-full bg-slate-900 border border-slate-800 rounded-xl p-3 font-mono text-xs text-emerald-300 overflow-x-auto text-center">
-            {receivedState.getKetString()}
+          <div className="w-full bg-face border border-rule p-3 font-mono text-xs font-bold text-pass overflow-x-auto text-center mt-4">
+            {receivedState.toKet(3)}
           </div>
         </div>
       </div>
@@ -205,69 +202,65 @@ export default function VerificationPage() {
         {/* Metric Cards */}
         <div className="lg:col-span-5 grid grid-cols-2 gap-3">
           {/* Fidelity */}
-          <div className="bg-slate-950 border border-slate-800 rounded-xl p-4 shadow-md space-y-1">
-            <div className="text-[11px] font-mono text-slate-400 uppercase">State Fidelity F</div>
-            <div className="text-2xl font-bold font-mono text-emerald-400">
-              {(verificationResult.fidelity * 100).toFixed(1)}%
+          <div className="panel p-4 space-y-1">
+            <div className="text-[10px] font-mono font-bold text-ink-muted uppercase tracking-wider">State Fidelity F</div>
+            <div className="text-2xl font-bold font-mono text-pass">
+              {(verification.fidelity * 100).toFixed(1)}%
             </div>
-            <div className="text-[10px] text-slate-400">|⟨ψ_in|ψ_out⟩|² = {verificationResult.fidelity}</div>
+            <div className="text-[9px] font-mono font-bold text-ink-muted">|⟨ψ_in|ψ_out⟩|² = {verification.fidelity.toFixed(3)}</div>
           </div>
 
           {/* QBER */}
-          <div className="bg-slate-950 border border-slate-800 rounded-xl p-4 shadow-md space-y-1">
-            <div className="text-[11px] font-mono text-slate-400 uppercase">QBER</div>
+          <div className="panel p-4 space-y-1">
+            <div className="text-[10px] font-mono font-bold text-ink-muted uppercase tracking-wider">QBER</div>
             <div
               className={`text-2xl font-bold font-mono ${
-                verificationResult.qber > 5.0 ? 'text-rose-400' : 'text-emerald-400'
+                verification.qber > 5.0 ? 'text-adversary' : 'text-pass'
               }`}
             >
-              {verificationResult.qber}%
+              {verification.qber.toFixed(2)}%
             </div>
-            <div className="text-[10px] text-slate-400">Threshold: {verificationResult.threshold}%</div>
+            <div className="text-[9px] font-mono font-bold text-ink-muted">Threshold: {verification.threshold}%</div>
           </div>
 
           {/* Basis Consistency */}
-          <div className="col-span-2 bg-slate-950 border border-slate-800 rounded-xl p-4 shadow-md space-y-2">
-            <div className="text-[11px] font-mono text-slate-400 uppercase">MUB Eigenstate Deviations</div>
-            <div className="grid grid-cols-3 gap-2 text-center text-xs font-mono">
-              <div className="bg-slate-900 border border-slate-800 p-2 rounded">
-                <div className="text-slate-400 text-[10px]">Z-Basis</div>
-                <div className="text-sky-300 font-bold">{verificationResult.mubScores.zBasisError}%</div>
+          <div className="col-span-2 panel p-4 space-y-2">
+            <div className="text-[10px] font-mono font-bold text-ink-muted uppercase tracking-wider border-b border-rule pb-2 mb-2">MUB Eigenstate Deviations</div>
+            <div className="grid grid-cols-3 gap-2 text-center text-xs font-mono font-bold uppercase tracking-wider">
+              <div className="bg-bench border border-rule p-2">
+                <div className="text-ink-muted text-[9px] mb-1">Z-Basis</div>
+                <div className="text-quantum">{(verification.mub['Z'].deviation * 100).toFixed(1)}%</div>
               </div>
-              <div className="bg-slate-900 border border-slate-800 p-2 rounded">
-                <div className="text-slate-400 text-[10px]">X-Basis</div>
-                <div className="text-emerald-300 font-bold">{verificationResult.mubScores.xBasisError}%</div>
+              <div className="bg-bench border border-rule p-2">
+                <div className="text-ink-muted text-[9px] mb-1">X-Basis</div>
+                <div className="text-pass">{(verification.mub['X'].deviation * 100).toFixed(1)}%</div>
               </div>
-              <div className="bg-slate-900 border border-slate-800 p-2 rounded">
-                <div className="text-slate-400 text-[10px]">Y-Basis</div>
-                <div className="text-pink-300 font-bold">{verificationResult.mubScores.yBasisError}%</div>
+              <div className="bg-bench border border-rule p-2">
+                <div className="text-ink-muted text-[9px] mb-1">Y-Basis</div>
+                <div className="text-warn">{(verification.mub['Y'].deviation * 100).toFixed(1)}%</div>
               </div>
             </div>
           </div>
         </div>
 
         {/* Detailed Scientific Diagnostic Breakdown */}
-        <div className="lg:col-span-7 bg-slate-950 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-3">
-          <div className="flex items-center gap-2 text-sm font-bold text-white">
-            <ShieldCheck className="w-4 h-4 text-sky-400" />
+        <div className="lg:col-span-7 panel p-6 space-y-3">
+          <div className="flex items-center gap-2 text-sm font-bold text-ink uppercase tracking-wider border-b border-rule pb-3">
+            <IconVerify size={16} className="text-quantum" />
             <span>Scientific Diagnostic Report</span>
           </div>
 
-          <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 space-y-2 text-xs">
-            <div className="font-bold text-slate-200">
-              {verificationResult.scientificDiagnosis.summary}
+          <div className="bg-well border border-rule p-4 space-y-2 text-xs font-medium">
+            <div className="font-bold text-ink">
+              {verification.verdict === 'VALID' ? 'Channel Verification Passed' : 'Anomaly Detected'}
             </div>
-            <p className="text-slate-300 leading-relaxed">
-              {verificationResult.scientificDiagnosis.details}
+            <p className="text-ink-muted leading-relaxed">
+              {verification.cause}
             </p>
-            <div className="pt-2 border-t border-slate-800/80 space-y-1">
-              <div className="text-slate-400">
-                <strong className="text-slate-300">Root Mechanism:</strong>{' '}
-                {verificationResult.scientificDiagnosis.cause}
-              </div>
-              <div className="text-slate-400">
-                <strong className="text-emerald-400">Recommended Action:</strong>{' '}
-                {verificationResult.scientificDiagnosis.recommendedAction}
+            <div className="pt-3 mt-3 border-t border-rule space-y-1.5">
+              <div className="text-ink-muted">
+                <strong className="text-pass uppercase tracking-wider text-[10px] mr-2">Recommended Action:</strong>{' '}
+                {verification.action}
               </div>
             </div>
           </div>

@@ -4,27 +4,25 @@ import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
-  LayoutDashboard,
-  Atom,
-  Layers,
-  SendHorizontal,
-  CheckCircle2,
-  ShieldAlert,
-  Skull,
-  BarChart3,
-  BookOpen,
-  Settings,
-  Flame,
-  ChevronRight,
-  LucideIcon,
-} from 'lucide-react';
+  IconOverview,
+  IconBloch,
+  IconEntangle,
+  IconTeleport,
+  IconVerify,
+  IconThreat,
+  IconIntrusion,
+  IconExperiments,
+  IconLearn,
+  IconSettings,
+  IconChevronRight,
+} from '../icons/Icons';
 import { useQuantum } from '../../lib/experiments/experiment-store';
 
 interface NavItem {
   href: string;
   label: string;
   subtitle: string;
-  icon: LucideIcon;
+  icon: React.FC<{ size?: number; className?: string }>;
   badge?: string;
   badgeColor?: string;
 }
@@ -36,119 +34,119 @@ interface NavSection {
 
 export const AppSidebar: React.FC = () => {
   const pathname = usePathname();
-  const { teleportStep, attackConfig, verificationResult } = useQuantum();
+  const { step, attack, verification } = useQuantum();
 
-  const isAttacked = attackConfig.enabled && attackConfig.type !== 'none';
+  const isAttacked = attack.type !== 'none' && attack.type !== 'noise';
 
   const sections: NavSection[] = [
     {
-      title: 'CORE PLATFORM',
+      title: 'Core Platform',
       items: [
         {
           href: '/',
           label: 'Overview',
           subtitle: 'End-to-End Pipeline',
-          icon: LayoutDashboard,
+          icon: IconOverview,
         },
         {
           href: '/lab',
           label: 'Quantum Lab',
           subtitle: '3D Bloch & State Maker',
-          icon: Atom,
+          icon: IconBloch,
         },
         {
           href: '/bell',
           label: 'Bell Generator',
           subtitle: 'EPR Pair Resource',
-          icon: Layers,
+          icon: IconEntangle,
         },
       ],
     },
     {
-      title: 'TELEPORTATION & SIGNATURES',
+      title: 'Protocol Rail',
       items: [
         {
           href: '/teleportation',
-          label: 'Teleportation Station',
+          label: 'Teleportation',
           subtitle: '9-Step Quantum Engine',
-          icon: SendHorizontal,
-          badge: `Step ${teleportStep}/9`,
-          badgeColor: 'bg-cyan-950/80 text-cyan-300 border-cyan-700/60',
+          icon: IconTeleport,
+          badge: `Step ${step}/9`,
+          badgeColor: 'bg-quantum-tint text-quantum border-quantum',
         },
         {
           href: '/verification',
-          label: 'Signature Verification',
-          subtitle: 'Pauli & State Tomography',
-          icon: CheckCircle2,
-          badge: verificationResult.verdict,
+          label: 'Verification',
+          subtitle: 'Pauli & Tomography',
+          icon: IconVerify,
+          badge: verification.verdict,
           badgeColor:
-            verificationResult.verdict === 'VALID'
-              ? 'bg-emerald-950/80 text-emerald-300 border-emerald-700/60'
-              : verificationResult.verdict === 'SUSPICIOUS'
-              ? 'bg-amber-950/80 text-amber-300 border-amber-700/60'
-              : 'bg-rose-950/80 text-rose-300 border-rose-700/60',
+            verification.verdict === 'VALID'
+              ? 'bg-pass-tint text-pass border-pass'
+              : verification.verdict === 'SUSPICIOUS'
+              ? 'bg-warn-tint text-warn border-warn'
+              : 'bg-adversary-tint text-adversary border-adversary',
         },
       ],
     },
     {
-      title: 'SECURITY & THREATS',
+      title: 'Security',
       items: [
         {
           href: '/threats',
           label: 'Threat Detection',
-          subtitle: 'QBER & MUB Analyzer',
-          icon: ShieldAlert,
-          badge: `${verificationResult.qber}%`,
+          subtitle: 'QBER Analyzer',
+          icon: IconThreat,
+          badge: `${verification.qber.toFixed(1)}%`,
           badgeColor:
-            verificationResult.qber > 5
-              ? 'bg-rose-950/80 text-rose-300 border-rose-700/60'
-              : 'bg-slate-900 text-slate-300 border-slate-700/60',
+            verification.qber > 5
+              ? 'bg-adversary-tint text-adversary border-adversary'
+              : 'bg-well text-ink-muted border-rule',
         },
         {
           href: '/attacks',
           label: 'Attack Simulator',
-          subtitle: 'Red Team Adversary Lab',
-          icon: isAttacked ? Flame : Skull,
+          subtitle: 'Red Team Lab',
+          icon: IconIntrusion,
           badge: isAttacked ? 'ACTIVE' : undefined,
-          badgeColor: 'bg-rose-950/90 text-rose-300 border-rose-600 animate-pulse',
+          badgeColor: 'bg-adversary text-white border-adversary',
         },
       ],
     },
     {
-      title: 'ANALYTICS & EDUCATION',
+      title: 'Tools',
       items: [
         {
           href: '/experiments',
-          label: 'Experiments & Data',
-          subtitle: 'Delta Benchmark & Export',
-          icon: BarChart3,
+          label: 'Experiments',
+          subtitle: 'Benchmark & Export',
+          icon: IconExperiments,
         },
         {
           href: '/learn',
-          label: 'Theory & Knowledge',
+          label: 'Theory',
           subtitle: '15 Curated Modules',
-          icon: BookOpen,
+          icon: IconLearn,
         },
         {
           href: '/settings',
           label: 'Settings',
           subtitle: 'Precision & Presets',
-          icon: Settings,
+          icon: IconSettings,
         },
       ],
     },
   ];
 
   return (
-    <aside className="w-full lg:w-68 shrink-0 bg-[#070b16]/90 border-r border-white/[0.06] flex flex-col justify-between select-none p-3 shadow-2xl">
-      <div className="space-y-5">
+    <aside className="w-full lg:w-68 shrink-0 bg-face border-r border-rule flex flex-col justify-between select-none p-3 relative z-10">
+      <div className="space-y-6">
         {sections.map((sec, idx) => (
           <div key={idx} className="space-y-1">
-            <div className="px-3 text-[10px] font-mono font-bold text-slate-400 tracking-wider">
+            <div className="label px-3 uppercase tracking-wider mb-2">
               {sec.title}
             </div>
 
-            <div className="space-y-0.5">
+            <div className="space-y-px">
               {sec.items.map((item) => {
                 const isActive = pathname === item.href;
                 const Icon = item.icon;
@@ -157,26 +155,17 @@ export const AppSidebar: React.FC = () => {
                   <Link
                     key={item.href}
                     href={item.href}
-                    className={`group relative flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-medium transition-all duration-200 ${
+                    className={`group relative flex items-center justify-between px-3 py-2 text-xs transition-colors ${
                       isActive
-                        ? 'bg-gradient-to-r from-cyan-950/70 to-blue-950/40 text-cyan-300 border border-cyan-500/40 font-semibold shadow-lg shadow-cyan-950/40'
-                        : 'text-slate-400 hover:text-slate-100 hover:bg-white/[0.04] border border-transparent'
+                        ? 'bg-quantum-tint text-quantum font-medium'
+                        : 'text-ink-muted hover:bg-well hover:text-ink'
                     }`}
                   >
-                    <div className="flex items-center gap-2.5 truncate">
-                      <div
-                        className={`p-1.5 rounded-lg transition-colors ${
-                          isActive
-                            ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-400/30'
-                            : 'bg-slate-900/60 text-slate-400 group-hover:text-slate-200 border border-white/[0.04]'
-                        }`}
-                      >
-                        <Icon className="w-4 h-4 shrink-0" />
-                      </div>
-
+                    <div className="flex items-center gap-3 truncate">
+                      <Icon size={16} className="shrink-0" />
                       <div className="truncate text-left">
-                        <div className="truncate font-semibold">{item.label}</div>
-                        <div className="text-[10px] text-slate-400 font-normal truncate">
+                        <div className="truncate text-[13px]">{item.label}</div>
+                        <div className={`text-[10px] truncate ${isActive ? 'text-quantum opacity-80' : 'text-ink-faint'}`}>
                           {item.subtitle}
                         </div>
                       </div>
@@ -184,14 +173,15 @@ export const AppSidebar: React.FC = () => {
 
                     {item.badge ? (
                       <span
-                        className={`text-[9px] font-mono font-bold px-1.5 py-0.5 rounded border shrink-0 shadow-sm ${item.badgeColor}`}
+                        className={`text-[9px] font-mono font-medium px-1.5 py-0.5 border shrink-0 ${item.badgeColor}`}
                       >
                         {item.badge}
                       </span>
                     ) : (
-                      <ChevronRight
-                        className={`w-3.5 h-3.5 shrink-0 transition-transform group-hover:translate-x-0.5 ${
-                          isActive ? 'text-cyan-400 opacity-100' : 'text-slate-600 opacity-0 group-hover:opacity-100'
+                      <IconChevronRight
+                        size={14}
+                        className={`shrink-0 transition-transform group-hover:translate-x-0.5 ${
+                          isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
                         }`}
                       />
                     )}
@@ -204,19 +194,18 @@ export const AppSidebar: React.FC = () => {
       </div>
 
       {/* Bottom Telemetry Card */}
-      <div className="mt-4 p-3 rounded-xl bg-gradient-to-b from-[#0b1222] to-[#070c18] border border-white/[0.07] text-[11px] font-mono space-y-1.5 shadow-xl">
-        <div className="flex items-center justify-between text-slate-400">
+      <div className="mt-6 panel p-3 text-[11px] font-mono space-y-2">
+        <div className="flex items-center justify-between text-ink-muted">
           <span className="flex items-center gap-1.5">
-            <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span>State Fidelity:</span>
+            <span className="text-ink-faint">Fidelity:</span>
           </span>
-          <strong className="text-cyan-300">{(verificationResult.fidelity * 100).toFixed(1)}%</strong>
+          <strong className="text-quantum">{(verification.fidelity * 100).toFixed(1)}%</strong>
         </div>
 
-        <div className="w-full bg-slate-900 h-1.5 rounded-full overflow-hidden border border-white/[0.05]">
+        <div className="w-full bg-well h-1.5 border border-rule overflow-hidden">
           <div
-            className="h-full bg-gradient-to-r from-cyan-500 to-emerald-400 transition-all duration-300 rounded-full"
-            style={{ width: `${Math.min(100, verificationResult.fidelity * 100)}%` }}
+            className="h-full bg-quantum transition-all duration-300"
+            style={{ width: `${Math.min(100, verification.fidelity * 100)}%` }}
           />
         </div>
       </div>

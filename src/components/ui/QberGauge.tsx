@@ -30,16 +30,16 @@ export const QberGauge: React.FC<QberGaugeProps> = ({
   const isSevere = qber > 15.0;
 
   const statusColor = isSevere
-    ? 'text-rose-400'
+    ? 'text-adversary'
     : isExceeded
-    ? 'text-amber-400'
-    : 'text-emerald-400';
+    ? 'text-warn'
+    : 'text-pass';
 
   const statusBadge = isSevere
-    ? 'bg-rose-950/80 text-rose-300 border-rose-800'
+    ? 'bg-adversary-tint text-adversary border-adversary'
     : isExceeded
-    ? 'bg-amber-950/80 text-amber-300 border-amber-800'
-    : 'bg-emerald-950/80 text-emerald-300 border-emerald-800';
+    ? 'bg-warn-tint text-warn border-warn'
+    : 'bg-pass-tint text-pass border-pass';
 
   // SVG dimensions
   const r = 85;
@@ -53,44 +53,34 @@ export const QberGauge: React.FC<QberGaugeProps> = ({
   const threshY = cy - (r + 4) * Math.sin(thresholdAngleRad);
 
   return (
-    <div className="bg-slate-950 border border-slate-800 rounded-xl p-4 shadow-xl flex flex-col items-center">
+    <div className="panel p-4 flex flex-col items-center">
       <div className="w-full flex items-center justify-between mb-2">
-        <span className="text-xs font-mono text-slate-400 uppercase tracking-wider">
+        <span className="text-xs font-mono text-ink-muted uppercase tracking-wider">
           {label}
         </span>
-        <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full border ${statusBadge}`}>
+        <span className={`text-[10px] font-mono px-2 py-0.5 border ${statusBadge}`}>
           {isSevere ? 'CRITICAL DISTURBANCE' : isExceeded ? 'ELEVATED ERROR' : 'NOMINAL SECURE'}
         </span>
       </div>
 
-      <div className="relative w-[220px] h-[120px] flex items-center justify-center">
+      <div className="relative w-[220px] h-[120px] flex items-center justify-center mt-2">
         <svg viewBox="0 0 220 120" className="w-full h-full select-none">
-          <defs>
-            <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#10b981" />
-              <stop offset="25%" stopColor="#34d399" />
-              <stop offset="35%" stopColor="#f59e0b" />
-              <stop offset="70%" stopColor="#ef4444" />
-              <stop offset="100%" stopColor="#be123c" />
-            </linearGradient>
-          </defs>
-
           {/* Background Arc Track */}
           <path
             d={`M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${cx + r} ${cy}`}
             fill="none"
-            stroke="#1e293b"
+            stroke="#e4e6ea"
             strokeWidth="12"
-            strokeLinecap="round"
+            strokeLinecap="square"
           />
 
-          {/* Value Gradient Arc */}
+          {/* Value Arc (solid color based on status) */}
           <path
             d={`M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${cx + r} ${cy}`}
             fill="none"
-            stroke="url(#gaugeGrad)"
+            stroke={isSevere ? '#c62d1f' : isExceeded ? '#8f5e0a' : '#0f7a4e'}
             strokeWidth="12"
-            strokeLinecap="round"
+            strokeLinecap="square"
             strokeDasharray={`${(percentageOfMax / 100) * (Math.PI * r)} ${Math.PI * r}`}
           />
 
@@ -100,8 +90,8 @@ export const QberGauge: React.FC<QberGaugeProps> = ({
             y1={cy - (r - 16) * Math.sin(thresholdAngleRad)}
             x2={threshX}
             y2={threshY}
-            stroke="#f59e0b"
-            strokeWidth="2.5"
+            stroke="#8f5e0a"
+            strokeWidth="2.0"
           />
 
           {/* Gauge Center & Needle */}
@@ -110,34 +100,34 @@ export const QberGauge: React.FC<QberGaugeProps> = ({
             y1={cy}
             x2={needleX}
             y2={needleY}
-            stroke="#f8fafc"
-            strokeWidth="3"
-            strokeLinecap="round"
+            stroke="#14161a"
+            strokeWidth="2.5"
+            strokeLinecap="square"
           />
-          <circle cx={cx} cy={cy} r="6" fill="#f8fafc" />
-          <circle cx={cx} cy={cy} r="3" fill="#0f172a" />
+          <circle cx={cx} cy={cy} r="6" fill="#14161a" />
+          <circle cx={cx} cy={cy} r="3" fill="#ffffff" />
         </svg>
 
         {/* Big Numeric Readout in center */}
         <div className="absolute bottom-1 text-center">
-          <div className={`text-2xl font-mono font-bold ${statusColor}`}>
+          <div className={`text-2xl font-mono font-bold tnum ${statusColor}`}>
             {qber.toFixed(2)}%
           </div>
-          <div className="text-[10px] font-mono text-slate-400">
+          <div className="text-[10px] font-mono text-ink-muted">
             Threshold: {threshold.toFixed(1)}%
           </div>
         </div>
       </div>
 
       {/* Meaningful Context Explanation */}
-      <div className="mt-3 w-full bg-slate-900/90 border border-slate-800/80 rounded p-2.5 text-xs text-slate-300 leading-tight">
+      <div className="mt-4 w-full bg-well border border-rule p-2.5 text-xs text-ink leading-tight font-medium">
         {isExceeded ? (
-          <span className="text-amber-300">
-            ⚠️ Channel error exceeds the {threshold}% threshold. Quantum state disturbance detected.
+          <span className="text-warn">
+            ! Channel error exceeds the {threshold}% threshold. Quantum state disturbance detected.
           </span>
         ) : (
-          <span className="text-emerald-300">
-            ✓ Error rate is within safe bounds. Quantum channel is reliable and intact.
+          <span className="text-pass">
+            + Error rate is within safe bounds. Quantum channel is reliable and intact.
           </span>
         )}
       </div>

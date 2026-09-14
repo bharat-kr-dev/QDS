@@ -10,24 +10,24 @@ interface HistogramChartProps {
 
 export const HistogramChart: React.FC<HistogramChartProps> = ({
   result,
-  title = 'Projective Measurement Distribution',
+  title = 'Measurement Distribution',
 }) => {
   const outcomes = Object.keys(result.counts);
 
   return (
-    <div className="bg-slate-950 border border-slate-800 rounded-xl p-4 shadow-xl">
+    <div className="panel p-4">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
         <div>
-          <h4 className="text-sm font-semibold text-white flex items-center gap-2">
-            <span className="h-2 w-2 rounded-full bg-sky-400" />
+          <h4 className="text-sm font-semibold text-ink flex items-center gap-2">
+            <span className="h-2 w-2 rounded-full bg-quantum" />
             {title} ({result.basis}-Basis)
           </h4>
-          <p className="text-xs text-slate-400">
-            Total sampled shots: <span className="font-mono text-slate-200">{result.shots.toLocaleString()}</span>
+          <p className="text-xs text-ink-muted">
+            Total sampled shots: <span className="tnum font-medium text-ink">{result.shots.toLocaleString()}</span>
           </p>
         </div>
-        <div className="text-xs font-mono text-slate-400 bg-slate-900 border border-slate-800 px-2.5 py-1 rounded">
-          Empirical Error: <span className="text-emerald-400 font-semibold">{result.errorPercentage}%</span>
+        <div className="text-xs font-mono text-ink-muted bg-well border border-rule px-2.5 py-1">
+          Empirical Error: <span className="text-warn font-semibold">{result.deviation}%</span>
         </div>
       </div>
 
@@ -35,34 +35,34 @@ export const HistogramChart: React.FC<HistogramChartProps> = ({
         {outcomes.map((outcome) => {
           const count = result.counts[outcome] || 0;
           const observedProb = result.probabilities[outcome] || 0;
-          const theoreticalProb = result.theoreticalProbabilities[outcome] || 0;
+          const theoreticalProb = result.theoretical[outcome] || 0;
 
           return (
             <div key={outcome} className="space-y-1.5">
               <div className="flex justify-between items-center text-xs font-mono">
-                <span className="font-bold text-sky-300 text-sm">{outcome}</span>
+                <span className="font-bold text-quantum text-sm">{outcome}</span>
                 <div className="flex items-center gap-3">
-                  <span className="text-slate-400">
-                    Observed: <strong className="text-white">{(observedProb * 100).toFixed(1)}%</strong> ({count.toLocaleString()} shots)
+                  <span className="text-ink-muted">
+                    Observed: <strong className="text-ink">{(observedProb * 100).toFixed(1)}%</strong> ({count.toLocaleString()} shots)
                   </span>
-                  <span className="text-slate-500">
-                    Expected: <strong className="text-slate-400">{(theoreticalProb * 100).toFixed(1)}%</strong>
+                  <span className="text-ink-faint">
+                    Expected: <strong className="text-ink-muted">{(theoreticalProb * 100).toFixed(1)}%</strong>
                   </span>
                 </div>
               </div>
 
               {/* Stacked comparison bar */}
-              <div className="relative h-6 bg-slate-900 rounded-lg overflow-hidden border border-slate-800 flex items-center">
+              <div className="relative h-5 bg-well overflow-hidden border border-rule flex items-center">
                 {/* Theoretical marker tick */}
                 <div
-                  className="absolute top-0 bottom-0 w-0.5 bg-amber-400 z-10"
+                  className="absolute top-0 bottom-0 w-px bg-warn z-10"
                   style={{ left: `${theoreticalProb * 100}%` }}
                   title={`Theoretical Target: ${(theoreticalProb * 100).toFixed(1)}%`}
                 />
 
                 {/* Observed fill bar */}
                 <div
-                  className="h-full bg-gradient-to-r from-sky-600 to-cyan-500 transition-all duration-300 rounded-lg"
+                  className="h-full bg-quantum transition-all duration-300"
                   style={{ width: `${Math.max(1, observedProb * 100)}%` }}
                 />
               </div>
@@ -71,12 +71,12 @@ export const HistogramChart: React.FC<HistogramChartProps> = ({
         })}
       </div>
 
-      <div className="mt-3 pt-3 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400">
-        <div className="flex items-center gap-2">
-          <span className="h-2 w-2 rounded bg-cyan-500" /> Observed Frequency
-          <span className="h-2 w-2 rounded bg-amber-400 ml-2" /> Theoretical Value (Born Rule)
+      <div className="mt-4 pt-3 border-t border-rule flex items-center justify-between text-[11px] text-ink-muted">
+        <div className="flex items-center gap-3">
+          <span className="flex items-center gap-1.5"><span className="h-2 w-2 bg-quantum" /> Observed</span>
+          <span className="flex items-center gap-1.5"><span className="w-px h-2 bg-warn" /> Theoretical</span>
         </div>
-        <span className="font-mono text-slate-400">P = |⟨eigenstate|ψ⟩|²</span>
+        <span className="font-mono text-ink-faint">P = |⟨eigenstate|ψ⟩|²</span>
       </div>
     </div>
   );

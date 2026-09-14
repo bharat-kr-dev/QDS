@@ -1,113 +1,183 @@
 import { StateVector } from '../quantum/statevector';
-import { BasisType } from '../quantum/types';
+import type { BasisType, MubCheck, VerificationResult } from '../quantum/types';
+import { QBER_THRESHOLD, TAMPER_MULTIPLE } from '../config';
+import { BASES, computeQber, isDisturbed, type QberReport, type StateMixture } from './qber';
 
-export interface MUBCheckResult {
-  basis: BasisType;
-  expectedDistribution: { outcome0: number; outcome1: number };
-  observedDistribution: { outcome0: number; outcome1: number };
-  deviationScore: number; // 0.0 (perfect) to 1.0 (maximal disturbance)
-  isDisturbed: boolean;
-}
+export { computeQber, basisDisagreement, mixtureDistribution } from './qber';
+export type { QberReport, StateMixture } from './qber';
 
-export interface ThreatAnalysisReport {
+/*
+  Reading a disturbance.
+
+  An error rate alone says a channel is noisy. It does not say *why*. The
+  pattern across the three mutually unbiased bases does, because different
+  faults break different symmetries:
+
+    phase rotation   Z populations untouched, X and Y shifted. The state
+                     vector moved but the measurement statistics along the
+                     phase axis did not, so only the conjugate bases see it.
+
+    intercept-resend every basis disturbed roughly equally. Measuring in a
+    interceptions      basis the sender did not use randomises the outcome,
+                     and the adversary cannot restore what she destroyed.
+
+    replay           nothing disturbed at all. The state is genuine — it is
+                     simply old. No quantum measurement can detect this,
+                     which is why the protocol needs a nonce.
+
+  Separating drift from attack is the difference between recalibrating and
+  shutting the link down, so it is worth the extra basis.
+*/
+
+export type ThreatLevel = 'CLEAR' | 'DRIFTING' | 'SUSPECT' | 'COMPROMISED';
+export interface ThreatReport {
+  level: ThreatLevel;
+  /** Headline error rate, in percent. */
   qber: number;
   threshold: number;
-  isQberExceeded: boolean;
-  status: 'NORMAL' | 'ELEVATED_NOISE' | 'ANOMALOUS_DISTURBANCE' | 'HIGH_ALERT';
-  mubChecks: Record<BasisType, MUBCheckResult>;
-  overallDisturbanceScore: number;
-  scientificExplanation: string;
-  recommendedAction: string;
+  exceedsThreshold: boolean;
+  mub: Record<BasisType, MubCheck>;
+  perBasis: Record<BasisType, number>;
+  disturbedBases: BasisType[];
+  /**
+   * True when only the conjugate bases deviate while Z holds.
+   * A phase rotation looks like this; an interception does not.
+   */
+  phaseLike: boolean;
+  /** True when all three bases deviate substantially — the interception signature. */
+  broadDisturbance: boolean;
+  report: QberReport;
 }
 
-export function calculateQBER(errors: number, totalBits: number): number {
-  if (totalBits <= 0) return 0;
-  return Number(((errors / totalBits) * 100).toFixed(2));
-}
+export function assessThreat(
+  expected: StateVector,
+  received: StateVector | StateMixture,
+  threshold: number = QBER_THRESHOLD,
+): ThreatReport {
+  const report = computeQber(expected, received, threshold);
 
-export function performMUBAnalysis(
-  originalState: StateVector,
-  receivedState: StateVector,
-  shotsPerBasis: number = 500
-): Record<BasisType, MUBCheckResult> {
-  const bases: BasisType[] = ['Z', 'X', 'Y'];
-  const results: Partial<Record<BasisType, MUBCheckResult>> = {};
+  const disturbedBases = BASES.filter((b) => isDisturbed(report, b));
+  const zClean = !isDisturbed(report, 'Z');
+  const conjugateDisturbed = isDisturbed(report, 'X') || isDisturbed(report, 'Y');
 
-  for (const basis of bases) {
-    const expected = originalState.getBasisProbabilities(basis);
-    const measured = receivedState.measure(basis, shotsPerBasis);
+  const phaseLike = zClean && conjugateDisturbed;
+  const broadDisturbance = disturbedBases.length === 3 && report.qber > threshold / 2;
 
-    const labels =
-      basis === 'Z'
-        ? { '0': '|0⟩', '1': '|1⟩' }
-        : basis === 'X'
-        ? { '0': '|+⟩', '1': '|-⟩' }
-        : { '0': '|i⟩', '1': '|-i⟩' };
-
-    const obs0 = measured.probabilities[labels['0']] ?? 0;
-    const obs1 = measured.probabilities[labels['1']] ?? 0;
-
-    const diff0 = Math.abs(obs0 - expected.outcome0);
-    const diff1 = Math.abs(obs1 - expected.outcome1);
-    const deviationScore = Number(((diff0 + diff1) / 2).toFixed(4));
-
-    results[basis] = {
-      basis,
-      expectedDistribution: {
-        outcome0: Number(expected.outcome0.toFixed(4)),
-        outcome1: Number(expected.outcome1.toFixed(4)),
-      },
-      observedDistribution: {
-        outcome0: Number(obs0.toFixed(4)),
-        outcome1: Number(obs1.toFixed(4)),
-      },
-      deviationScore,
-      isDisturbed: deviationScore > 0.08, // > 8% statistical deviation
-    };
-  }
-
-  return results as Record<BasisType, MUBCheckResult>;
-}
-
-export function evaluateThreatReport(
-  qber: number,
-  threshold: number = 5.0,
-  mubResults: Record<BasisType, MUBCheckResult>
-): ThreatAnalysisReport {
-  const isQberExceeded = qber > threshold;
-  const avgMubDeviation =
-    (mubResults.Z.deviationScore + mubResults.X.deviationScore + mubResults.Y.deviationScore) / 3;
-
-  let status: 'NORMAL' | 'ELEVATED_NOISE' | 'ANOMALOUS_DISTURBANCE' | 'HIGH_ALERT';
-  let scientificExplanation: string;
-  let recommendedAction: string;
-
-  if (qber <= threshold && avgMubDeviation < 0.06) {
-    status = 'NORMAL';
-    scientificExplanation = `The observed Quantum Bit Error Rate (QBER = ${qber.toFixed(2)}%) is within the safe operational threshold of ${threshold.toFixed(1)}%. MUB basis consistency checks confirm that quantum state superpositions remained intact during transmission.`;
-    recommendedAction = 'Proceed with signature verification and acceptance.';
-  } else if (qber <= threshold && avgMubDeviation >= 0.06) {
-    status = 'ELEVATED_NOISE';
-    scientificExplanation = `QBER (${qber.toFixed(2)}%) is technically below the threshold, but subtle basis distribution deviations were detected in conjugate bases (${(avgMubDeviation * 100).toFixed(1)}% MUB deviation). This indicates ambient optical drift, minor fiber birefringence, or low-intensity background noise.`;
-    recommendedAction = 'Monitor channel stability; increase verification shot sample if critical.';
-  } else if (qber > threshold && qber < 20.0) {
-    status = 'ANOMALOUS_DISTURBANCE';
-    scientificExplanation = `The observed error rate (QBER = ${qber.toFixed(2)}%) exceeds the configured threshold of ${threshold.toFixed(1)}%. Noticeable disturbance across Mutually Unbiased Bases was detected. This may indicate channel thermal noise, optical misalignment, or an uncalibrated receiver. Possible active adversary eavesdropping cannot be ruled out.`;
-    recommendedAction = 'Abort signature acceptance; run channel recalibration or decoy pulse verification.';
+  let level: ThreatLevel;
+  if (report.qber <= 1e-9) {
+    level = 'CLEAR';
+  } else if (report.qber <= threshold && disturbedBases.length === 0) {
+    level = 'CLEAR';
+  } else if (report.qber <= threshold) {
+    level = 'DRIFTING';
+  } else if (report.qber < threshold * TAMPER_MULTIPLE) {
+    level = 'SUSPECT';
   } else {
-    status = 'HIGH_ALERT';
-    scientificExplanation = `Severe channel disturbance detected (QBER = ${qber.toFixed(2)}%, threshold = ${threshold.toFixed(1)}%). State vector overlap collapsed substantially across non-commuting bases. In quantum mechanics, non-orthogonal states cannot be extracted without creating large detectable errors (Born Rule / No-Cloning Theorem).`;
-    recommendedAction = 'Immediately reject signature. Reroute quantum key and signature distribution over redundant secure links.';
+    level = 'COMPROMISED';
   }
 
   return {
-    qber,
+    level,
+    qber: report.qber,
     threshold,
-    isQberExceeded,
-    status,
-    mubChecks: mubResults,
-    overallDisturbanceScore: Number(avgMubDeviation.toFixed(4)),
-    scientificExplanation,
-    recommendedAction,
+    exceedsThreshold: report.exceedsThreshold,
+    mub: report.mub,
+    perBasis: {
+      Z: report.perBasis.Z * 100,
+      X: report.perBasis.X * 100,
+      Y: report.perBasis.Y * 100,
+    },
+    disturbedBases,
+    phaseLike,
+    broadDisturbance,
+    report,
+  };
+}
+
+export function levelLabel(level: ThreatLevel): string {
+  switch (level) {
+    case 'CLEAR':
+      return 'Clear';
+    case 'DRIFTING':
+      return 'Drifting';
+    case 'SUSPECT':
+      return 'Suspect';
+    case 'COMPROMISED':
+      return 'Compromised';
+  }
+}
+
+/**
+ * The sentence a verifier would write.
+ *
+ * Ordered by what the evidence can actually establish. A stale packet is
+ * reported before anything quantum, because freshness is the one failure no
+ * measurement of the state can reveal — the state is perfect in that case,
+ * which is exactly the problem.
+ */
+export function diagnose(
+  report: ThreatReport,
+  fidelity: number,
+  correctionCorrect: boolean,
+  freshnessValid: boolean,
+  appliedCorrection: string,
+  requiredCorrection: string,
+): Pick<VerificationResult, 'verdict' | 'cause' | 'action'> {
+  const qber = report.qber.toFixed(2);
+  const fidelityPct = (fidelity * 100).toFixed(1);
+
+  if (!freshnessValid) {
+    return {
+      verdict: 'TAMPERED',
+      cause:
+        'The state is intact, but the packet is older than the replay window allows. Nothing in the quantum channel can reveal this — only the timestamp can.',
+      action: 'Reject, and require a freshly issued token. Discard the recorded transcript.',
+    };
+  }
+
+  if (!correctionCorrect) {
+    return {
+      verdict: 'INVALID',
+      cause: `The correction applied was ${appliedCorrection}, where the transmitted bits call for ${requiredCorrection}. The receiver is misaligned with the sender rather than under attack.`,
+      action: `Apply ${requiredCorrection} and re-verify. If the mismatch persists, inspect the classical channel rather than the quantum one.`,
+    };
+  }
+
+  if (report.level === 'CLEAR') {
+    const residual = report.qber < 0.01 ? 'No basis deviates measurably.' : `The largest basis deviation is ${qber}%.`;
+    return {
+      verdict: 'VALID',
+      cause: `Fidelity is ${fidelityPct}%. ${residual} Nothing here is distinguishable from an undisturbed channel.`,
+      action: 'Accept the signature.',
+    };
+  }
+
+  if (report.level === 'DRIFTING') {
+    const pattern = report.phaseLike
+      ? 'Only X and Y deviate while Z is untouched. That is the signature of a phase-type fault — a rotation or a dephasing — rather than a bit flip, because neither can move the populations along the axis it acts on.'
+      : 'Deviation is spread across the bases but stays small and even, which is what ordinary link drift looks like.';
+    return {
+      verdict: 'SUSPICIOUS',
+      cause: `The error rate is ${qber}%, under the ${report.threshold}% bound but above the noise floor. ${pattern}`,
+      action: 'Repeat the run with a larger sample, or recalibrate before trusting this link at length.',
+    };
+  }
+
+  if (report.level === 'SUSPECT') {
+    return {
+      verdict: 'SUSPICIOUS',
+      cause: `The error rate is ${qber}%, past the ${report.threshold}% bound. Disturbance of this size is larger than channel drift accounts for.`,
+      action: 'Treat this signature as unproven. Re-run with decoy pulses to establish whether the loss is environmental.',
+    };
+  }
+
+  const pattern = report.broadDisturbance
+    ? `Every basis is disturbed, Z included (${report.perBasis.Z.toFixed(1)}% / ${report.perBasis.X.toFixed(1)}% / ${report.perBasis.Y.toFixed(1)}%). A phase rotation cannot do that — only a measurement can.`
+    : 'Disturbance is far beyond anything the channel produces on its own.';
+
+  return {
+    verdict: 'TAMPERED',
+    cause: `The error rate is ${qber}%, well past the ${report.threshold}% bound. ${pattern}`,
+    action: 'Reject. Treat the channel as compromised and re-establish the key by other means.',
   };
 }

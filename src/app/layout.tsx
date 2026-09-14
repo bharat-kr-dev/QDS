@@ -16,8 +16,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
-      <body className="bg-slate-950 text-slate-100 min-h-screen antialiased flex flex-col font-sans selection:bg-sky-500/30 selection:text-sky-200">
+    <html lang="en">
+      <body className="bg-bench text-ink min-h-screen antialiased flex flex-col font-sans selection:bg-quantum-tint selection:text-ink">
         <QuantumProvider>
           <AppHeader />
           <div className="flex-1 flex flex-col lg:flex-row min-h-[calc(100vh-57px)]">
