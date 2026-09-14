@@ -6,6 +6,8 @@ import {
   IconInfo,
   IconChevronRight,
 } from '../../components/icons/Icons';
+import 'katex/dist/katex.min.css';
+import { BlockMath } from 'react-katex';
 
 interface TheoryTopic {
   id: string;
@@ -278,8 +280,8 @@ export default function LearnPage() {
             <span className="text-[10px] font-mono font-bold text-ink-muted uppercase tracking-wider">
               2. Mathematical Representation
             </span>
-            <div className="bg-face border border-rule p-4 font-mono text-sm sm:text-base font-bold text-quantum overflow-x-auto">
-              {selectedTopic.equation}
+            <div className="bg-face border border-rule p-4 font-mono text-sm sm:text-base font-bold text-quantum overflow-x-auto text-center">
+              <BlockMath math={selectedTopic.equation} />
             </div>
           </div>
 
