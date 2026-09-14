@@ -2,7 +2,6 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { BlochCoordinates } from '../../lib/quantum/types';
-import { RotateCw, Compass, Eye, Sparkles } from 'lucide-react';
 
 interface BlochSphereProps {
   bloch: BlochCoordinates;
@@ -83,19 +82,15 @@ export const BlochSphere: React.FC<BlochSphereProps> = ({
 
     ctx.clearRect(0, 0, width, height);
 
-    // 1. Sphere background & deep radial volumetric glow
-    const grad = ctx.createRadialGradient(cx - radius * 0.2, cy - radius * 0.3, 5, cx, cy, radius * 1.1);
-    grad.addColorStop(0, 'rgba(14, 165, 233, 0.16)');
-    grad.addColorStop(0.6, 'rgba(15, 23, 42, 0.85)');
-    grad.addColorStop(1, 'rgba(2, 6, 23, 0.95)');
-    ctx.fillStyle = grad;
+    // 1. Sphere background (well)
+    ctx.fillStyle = '#e4e6ea';
     ctx.beginPath();
     ctx.arc(cx, cy, radius, 0, 2 * Math.PI);
     ctx.fill();
 
-    // 2. Sphere Outer Ring Neon
-    ctx.strokeStyle = 'rgba(56, 189, 248, 0.35)';
-    ctx.lineWidth = 1.5;
+    // 2. Sphere Outer Ring (rule)
+    ctx.strokeStyle = '#b4b9c1';
+    ctx.lineWidth = 1.0;
     ctx.beginPath();
     ctx.arc(cx, cy, radius, 0, 2 * Math.PI);
     ctx.stroke();
@@ -103,9 +98,9 @@ export const BlochSphere: React.FC<BlochSphereProps> = ({
     // 3. Latitude Rings (z = 0.5, z = -0.5)
     [-0.5, 0.5].forEach((latZ) => {
       const latR = Math.sqrt(1 - latZ * latZ);
-      ctx.strokeStyle = 'rgba(148, 163, 184, 0.12)';
+      ctx.strokeStyle = '#d2d5da';
       ctx.lineWidth = 1;
-      ctx.setLineDash([2, 4]);
+      ctx.setLineDash([2, 2]);
       ctx.beginPath();
       for (let i = 0; i <= 36; i++) {
         const angle = (i / 36) * 2 * Math.PI;
@@ -117,9 +112,9 @@ export const BlochSphere: React.FC<BlochSphereProps> = ({
     });
 
     // 4. Equator (XY plane circle at z=0)
-    ctx.strokeStyle = 'rgba(56, 189, 248, 0.4)';
-    ctx.lineWidth = 1.2;
-    ctx.setLineDash([3, 3]);
+    ctx.strokeStyle = '#8a9099';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([2, 2]);
     ctx.beginPath();
     const segments = 48;
     for (let i = 0; i <= segments; i++) {
@@ -132,8 +127,8 @@ export const BlochSphere: React.FC<BlochSphereProps> = ({
     ctx.setLineDash([]);
 
     // 5. Prime Meridian (XZ plane at y=0)
-    ctx.strokeStyle = 'rgba(148, 163, 184, 0.25)';
-    ctx.setLineDash([2, 3]);
+    ctx.strokeStyle = '#d2d5da';
+    ctx.setLineDash([2, 2]);
     ctx.beginPath();
     for (let i = 0; i <= segments; i++) {
       const angle = (i / segments) * 2 * Math.PI;
@@ -157,30 +152,31 @@ export const BlochSphere: React.FC<BlochSphereProps> = ({
       const pNeg = project3D(-dx * 1.22, -dy * 1.22, -dz * 1.22, radius, cx, cy);
 
       ctx.strokeStyle = axisColor;
-      ctx.lineWidth = 1.3;
+      ctx.lineWidth = 1.0;
+      ctx.setLineDash([]);
       ctx.beginPath();
       ctx.moveTo(pNeg.screenX, pNeg.screenY);
       ctx.lineTo(pPos.screenX, pPos.screenY);
       ctx.stroke();
 
       // Axis Labels
-      ctx.font = 'bold 10px "JetBrains Mono", monospace';
+      ctx.font = '500 10px monospace';
       ctx.fillStyle = axisColor;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText(labelPos, pPos.screenX, pPos.screenY);
-      ctx.fillStyle = 'rgba(148, 163, 184, 0.6)';
+      ctx.fillStyle = '#8a9099';
       ctx.fillText(labelNeg, pNeg.screenX, pNeg.screenY);
     };
 
     // Z-axis (Vertical: |0> at +Z, |1> at -Z)
-    drawAxis(0, 0, 1, '#38bdf8', '|0⟩ (+Z)', '|1⟩ (-Z)');
+    drawAxis(0, 0, 1, '#14161a', '|0⟩ (+Z)', '|1⟩ (-Z)');
 
     // X-axis (|+> at +X, |-> at -X)
-    drawAxis(1, 0, 0, '#34d399', '|+⟩ (+X)', '|-⟩ (-X)');
+    drawAxis(1, 0, 0, '#5c626b', '|+⟩ (+X)', '|-⟩ (-X)');
 
     // Y-axis (|+i> at +Y, |-i> at -Y)
-    drawAxis(0, 1, 0, '#f472b6', '|+i⟩ (+Y)', '|-i⟩ (-Y)');
+    drawAxis(0, 1, 0, '#5c626b', '|+i⟩ (+Y)', '|-i⟩ (-Y)');
 
     // 7. Draw State Vector Arrow |ψ⟩
     const sx = Math.sin(bloch.theta) * Math.cos(bloch.phi);
@@ -192,8 +188,8 @@ export const BlochSphere: React.FC<BlochSphereProps> = ({
 
     // Vector projection down to XY plane (for depth perspective)
     const shadowP = project3D(sx, sy, 0, radius, cx, cy);
-    ctx.strokeStyle = 'rgba(244, 114, 182, 0.4)';
-    ctx.lineWidth = 1.2;
+    ctx.strokeStyle = '#b4b9c1';
+    ctx.lineWidth = 1.0;
     ctx.setLineDash([2, 2]);
     ctx.beginPath();
     ctx.moveTo(tipP.screenX, tipP.screenY);
@@ -202,29 +198,23 @@ export const BlochSphere: React.FC<BlochSphereProps> = ({
     ctx.stroke();
     ctx.setLineDash([]);
 
-    // Vector glowing line
-    ctx.strokeStyle = '#f43f5e';
-    ctx.lineWidth = 3;
-    ctx.shadowColor = 'rgba(244, 63, 94, 0.6)';
-    ctx.shadowBlur = 8;
+    // Vector line
+    ctx.strokeStyle = '#1a3fbf'; // quantum
+    ctx.lineWidth = 2.0;
     ctx.beginPath();
     ctx.moveTo(centerP.screenX, centerP.screenY);
     ctx.lineTo(tipP.screenX, tipP.screenY);
     ctx.stroke();
-    ctx.shadowBlur = 0; // reset
 
-    // Arrowhead tip glowing dot
-    ctx.fillStyle = '#f43f5e';
+    // Arrowhead tip dot
+    ctx.fillStyle = '#1a3fbf';
     ctx.beginPath();
-    ctx.arc(tipP.screenX, tipP.screenY, 5.5, 0, 2 * Math.PI);
+    ctx.arc(tipP.screenX, tipP.screenY, 4, 0, 2 * Math.PI);
     ctx.fill();
-    ctx.strokeStyle = '#ffffff';
-    ctx.lineWidth = 1.5;
-    ctx.stroke();
 
-    // Label tag with backdrop
-    ctx.font = 'bold 12px "JetBrains Mono", monospace';
-    ctx.fillStyle = '#38bdf8';
+    // Label tag
+    ctx.font = '600 12px monospace';
+    ctx.fillStyle = '#1a3fbf';
     ctx.textAlign = 'left';
     ctx.fillText(` ${label}`, tipP.screenX + 6, tipP.screenY - 6);
   }, [bloch, rotX, rotY, size, label]);
@@ -253,7 +243,7 @@ export const BlochSphere: React.FC<BlochSphereProps> = ({
     <div className="flex flex-col items-center select-none w-full">
       <div className="relative w-full flex justify-center">
         <div
-          className="relative cursor-grab active:cursor-grabbing rounded-2xl bg-gradient-to-b from-[#0b1222] to-[#060a14] border border-white/[0.08] p-3 shadow-2xl shadow-cyan-950/30 overflow-hidden"
+          className="relative cursor-grab active:cursor-grabbing panel p-3 overflow-hidden"
           onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
@@ -270,14 +260,13 @@ export const BlochSphere: React.FC<BlochSphereProps> = ({
             <button
               onClick={() => setAutoRotate(!autoRotate)}
               title="Toggle Auto Rotation"
-              className={`p-1.5 rounded-lg border text-[10px] font-mono flex items-center gap-1 transition-all ${
+              className={`px-2 py-1 border text-[10px] font-mono transition-colors ${
                 autoRotate
-                  ? 'bg-cyan-600 border-cyan-400 text-white shadow-md'
-                  : 'bg-slate-900/90 border-white/[0.08] text-slate-300 hover:bg-slate-800'
+                  ? 'bg-quantum text-white border-quantum'
+                  : 'bg-face border-rule text-ink hover:bg-well'
               }`}
             >
-              <RotateCw className={`w-3 h-3 ${autoRotate ? 'animate-spin' : ''}`} />
-              <span>{autoRotate ? 'Rotating' : 'Orbit'}</span>
+              {autoRotate ? 'Rotating' : 'Orbit'}
             </button>
 
             <button
@@ -286,44 +275,40 @@ export const BlochSphere: React.FC<BlochSphereProps> = ({
                 setRotY(-0.45);
               }}
               title="Reset View Orientation"
-              className="p-1.5 rounded-lg bg-slate-900/90 hover:bg-slate-800 border border-white/[0.08] text-slate-300 text-[10px] font-mono transition-all"
+              className="px-2 py-1 bg-face hover:bg-well border border-rule text-ink text-[10px] font-mono transition-colors"
             >
-              Reset Cam
+              Reset
             </button>
-          </div>
-
-          <div className="absolute bottom-3 left-3 text-[10px] text-slate-400 font-mono bg-slate-950/90 px-2 py-0.5 rounded-md border border-white/[0.06] pointer-events-none">
-            🖱️ Drag to orbit 3D sphere
           </div>
         </div>
       </div>
 
       {/* Coordinate & Angle Telemetry HUD */}
       <div className="mt-3 grid grid-cols-2 gap-2 w-full text-xs font-mono">
-        <div className="bg-[#0b1222]/90 border border-white/[0.07] rounded-xl px-3 py-2 shadow-inner">
-          <div className="flex justify-between text-slate-400 text-[10px]">
+        <div className="well border border-rule px-3 py-2">
+          <div className="flex justify-between text-ink-muted text-[10px]">
             <span>Polar (θ):</span>
-            <span className="text-slate-400">{bloch.theta.toFixed(3)} rad</span>
+            <span className="text-ink-faint tnum">{bloch.theta.toFixed(3)} rad</span>
           </div>
-          <div className="text-base font-bold text-sky-400 mt-0.5">
+          <div className="text-base font-bold text-ink mt-0.5 tnum">
             {((bloch.theta * 180) / Math.PI).toFixed(1)}°
           </div>
         </div>
 
-        <div className="bg-[#0b1222]/90 border border-white/[0.07] rounded-xl px-3 py-2 shadow-inner">
-          <div className="flex justify-between text-slate-400 text-[10px]">
+        <div className="well border border-rule px-3 py-2">
+          <div className="flex justify-between text-ink-muted text-[10px]">
             <span>Azimuth (φ):</span>
-            <span className="text-slate-400">{bloch.phi.toFixed(3)} rad</span>
+            <span className="text-ink-faint tnum">{bloch.phi.toFixed(3)} rad</span>
           </div>
-          <div className="text-base font-bold text-amber-400 mt-0.5">
+          <div className="text-base font-bold text-ink mt-0.5 tnum">
             {((bloch.phi * 180) / Math.PI).toFixed(1)}°
           </div>
         </div>
 
-        <div className="col-span-2 bg-[#0b1222]/90 border border-white/[0.07] rounded-xl px-3 py-2 flex justify-between items-center text-[11px] shadow-inner">
-          <span className="text-slate-400">Cartesian Vector (x,y,z):</span>
-          <span className="text-cyan-300 font-bold">
-            [{bloch.x}, {bloch.y}, {bloch.z}]
+        <div className="col-span-2 well border border-rule px-3 py-2 flex justify-between items-center text-[11px]">
+          <span className="text-ink-muted">Vector (x,y,z):</span>
+          <span className="text-quantum font-bold tnum">
+            [{bloch.x.toFixed(3)}, {bloch.y.toFixed(3)}, {bloch.z.toFixed(3)}]
           </span>
         </div>
       </div>

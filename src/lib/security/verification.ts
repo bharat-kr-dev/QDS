@@ -1,105 +1,87 @@
 import { StateVector } from '../quantum/statevector';
-import { VerificationResult, VerificationVerdict } from '../quantum/types';
-import { evaluateThreatReport, performMUBAnalysis } from './threat-detection';
+import type { PauliCorrection, VerificationResult } from '../quantum/types';
+import { QBER_THRESHOLD } from '../config';
+import { assessThreat, diagnose } from './threat-detection';
+import type { StateMixture } from './qber';
 
-export function verifySignature(
-  expectedState: StateVector,
-  receivedState: StateVector,
-  classicalBits: [number, number],
-  appliedCorrection: 'I' | 'X' | 'Z' | 'XZ',
-  threshold: number = 5.0,
-  freshnessValid: boolean = true
-): VerificationResult {
-  // Determine theoretically required Pauli correction for the classical syndrome
+/*
+  The verifier.
+
+  This module does not compute an error rate of its own. It asks the threat
+  assessment for one — which in turn uses the metric shared with the attack
+  simulations — and then turns that into a verdict. Keeping one definition of
+  the error rate across all three modules is what stops the attack page and
+  the verification page from disagreeing about the same run.
+*/
+
+export interface VerifyOptions {
+  /** The state Alice meant to send. */
+  expected: StateVector;
+  /** What Bob holds after applying his correction, as a state or mixture. */
+  received: StateVector | StateMixture;
+  /** The two classical bits Alice sent. */
+  classicalBits: [number, number];
+  /** The correction Bob actually applied. */
+  appliedCorrection: PauliCorrection;
+  /**
+   * Bit pattern → correction map for the Bell resource in use.
+   * Supplied by the caller rather than derived here, so verification stays
+   * testable without knowing which resource is loaded.
+   */
+  correctionSchedule: Record<string, PauliCorrection>;
+  threshold?: number;
+  /** False when the packet is stale. Defaults to true. */
+  freshnessValid?: boolean;
+}
+
+export function verifySignature({
+  expected,
+  received,
+  classicalBits,
+  appliedCorrection,
+  correctionSchedule,
+  threshold = QBER_THRESHOLD,
+  freshnessValid = true,
+}: VerifyOptions): VerificationResult {
   const bitString = `${classicalBits[0]}${classicalBits[1]}`;
-  let expectedCorrection: 'I' | 'X' | 'Z' | 'XZ';
-  switch (bitString) {
-    case '00':
-      expectedCorrection = 'I';
-      break;
-    case '01':
-      expectedCorrection = 'X';
-      break;
-    case '10':
-      expectedCorrection = 'Z';
-      break;
-    case '11':
-      expectedCorrection = 'XZ';
-      break;
-    default:
-      expectedCorrection = 'I';
-  }
+  const requiredCorrection: PauliCorrection = correctionSchedule[bitString] ?? 'I';
+  const pauliCorrectionCorrect = appliedCorrection === requiredCorrection;
 
-  const pauliCorrectionCorrect = appliedCorrection === expectedCorrection;
+  const report = assessThreat(expected, received, threshold);
 
-  // Calculate Fidelity F = |<psi_expected | psi_received>|^2
-  const fidelity = expectedState.fidelity(receivedState);
+  // Fidelity is Σ pᵢ|⟨ψ|φᵢ⟩|² for a mixture, and the plain state fidelity for
+  // a single vector. Stated here rather than imported so the fallback is
+  // visible: a mixture with no branches would otherwise report 1.0.
+  const fidelity =
+    received instanceof StateVector
+      ? expected.fidelity(received)
+      : received.branches.length === 0
+        ? 0
+        : received.branches.reduce(
+            (acc, b) => acc + b.probability * expected.fidelity(b.state),
+            0,
+          );
 
-  // Perform MUB analysis
-  const mubResults = performMUBAnalysis(expectedState, receivedState, 600);
-
-  // Approximate QBER from fidelity and basis disturbance
-  const rawQber = Math.max(0, (1 - fidelity) * 100);
-  const threatReport = evaluateThreatReport(rawQber, threshold, mubResults);
-
-  // Determine classification verdict
-  let verdict: VerificationVerdict;
-  let summary: string;
-  let details: string;
-  let cause: string;
-  let recommendedAction: string;
-
-  if (!freshnessValid) {
-    verdict = 'TAMPERED';
-    summary = 'Signature Stale / Replay Flagged';
-    details = 'The quantum state matches, but the protocol-layer freshness timestamp / cryptographic nonce is expired or replayed.';
-    cause = 'Replay attack or network packet delay.';
-    recommendedAction = 'Discard signature and require fresh signed session token.';
-  } else if (!pauliCorrectionCorrect) {
-    verdict = 'INVALID';
-    summary = 'Incorrect Pauli Correction Applied';
-    details = `Bob applied correction '${appliedCorrection}', but classical bits '${bitString}' require unitary '${expectedCorrection}'.`;
-    cause = 'Classical channel transmission error, decoding malfunction, or manual override error.';
-    recommendedAction = `Apply the correct Pauli operation (${expectedCorrection}) to restore state alignment.`;
-  } else if (fidelity >= 0.95 && rawQber <= threshold) {
-    verdict = 'VALID';
-    summary = 'Quantum Signature Authenticated';
-    details = `Fidelity is ${(fidelity * 100).toFixed(1)}% and QBER is ${rawQber.toFixed(2)}%, well within the ${threshold}% security threshold.`;
-    cause = 'Unimpaired quantum teleportation and authentic Bell pair entanglement.';
-    recommendedAction = 'Accept digital signature as cryptographically valid.';
-  } else if (fidelity >= 0.80 && rawQber <= threshold * 2) {
-    verdict = 'SUSPICIOUS';
-    summary = 'Subtle Disturbance Detected';
-    details = `Fidelity dropped to ${(fidelity * 100).toFixed(1)}% with an error rate of ${rawQber.toFixed(2)}%.`;
-    cause = 'Moderate channel decoherence, optical loss, or low-probability eavesdropping probing.';
-    recommendedAction = 'Conduct secondary basis tomography or increase decoy sample rate before final commitment.';
-  } else {
-    verdict = 'TAMPERED';
-    summary = 'Significant State Collapse / Tampering';
-    details = `Fidelity is low (${(fidelity * 100).toFixed(1)}%) with elevated QBER (${rawQber.toFixed(2)}%).`;
-    cause = 'Active interception measurement (Intercept-Resend), unauthenticated forgery attempt, or severe channel fault.';
-    recommendedAction = 'Reject signature immediately. Flag channel as compromised.';
-  }
+  const { verdict, cause, action } = diagnose(
+    report,
+    fidelity,
+    pauliCorrectionCorrect,
+    freshnessValid,
+    appliedCorrection,
+    requiredCorrection,
+  );
 
   return {
     verdict,
-    fidelity: Number(fidelity.toFixed(4)),
-    qber: Number(rawQber.toFixed(2)),
-    threshold,
-    mubDisturbanceDetected: mubResults.Z.isDisturbed || mubResults.X.isDisturbed || mubResults.Y.isDisturbed,
-    mubScores: {
-      zBasisError: Number((mubResults.Z.deviationScore * 100).toFixed(2)),
-      xBasisError: Number((mubResults.X.deviationScore * 100).toFixed(2)),
-      yBasisError: Number((mubResults.Y.deviationScore * 100).toFixed(2)),
-    },
+    fidelity,
+    qber: report.qber,
+    threshold: report.threshold,
+    mubDisturbanceDetected: report.disturbedBases.length > 0,
+    mub: report.mub,
     pauliCorrectionApplied: appliedCorrection,
     pauliCorrectionCorrect,
     freshnessValid,
-    scientificDiagnosis: {
-      summary,
-      details,
-      cause,
-      recommendedAction,
-    },
+    cause,
+    action,
   };
 }

@@ -4,27 +4,21 @@ import React, { useState } from 'react';
 import { useQuantum } from '../../lib/experiments/experiment-store';
 import { HumanContextHelper } from '../../components/ui/HumanContextHelper';
 import {
-  BarChart3,
-  Download,
-  Trash2,
-  Save,
-  Layers,
-  ArrowUpDown,
-  FileSpreadsheet,
-  FileCode,
-  CheckCircle2,
-} from 'lucide-react';
+  IconSave,
+  IconTrash,
+  IconExport,
+} from '../../components/icons/Icons';
 
 export default function ExperimentsPage() {
   const {
     experiments,
-    saveCurrentExperiment,
+    saveExperiment,
     deleteExperiment,
     clearExperiments,
-    exportExperimentsJson,
-    exportExperimentsCsv,
-    verificationResult,
-    attackConfig,
+    exportJson,
+    exportCsv,
+    verification,
+    attack,
   } = useQuantum();
 
   const [compareIdA, setCompareIdA] = useState<string>('');
@@ -36,16 +30,16 @@ export default function ExperimentsPage() {
   return (
     <div className="space-y-8">
       {/* Page Header */}
-      <div className="bg-slate-950 border border-slate-800 rounded-2xl p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="panel p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-sky-950/80 border border-sky-800 text-[11px] font-mono text-sky-400 mb-1.5">
-            <BarChart3 className="w-3.5 h-3.5" />
+          <div className="inline-flex items-center gap-2 px-2.5 py-0.5 border border-quantum bg-quantum-tint text-[10px] font-mono font-bold text-quantum uppercase tracking-wider mb-2">
+            <IconExport size={12} />
             Research Analytics & Data Store
           </div>
-          <h1 className="text-xl lg:text-2xl font-bold text-white tracking-tight">
+          <h1 className="text-xl lg:text-2xl font-bold text-ink tracking-tight uppercase font-sans">
             Experiment Comparison & Analytics Suite
           </h1>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-ink-muted mt-1 font-medium">
             Log simulation runs, benchmark side-by-side metric deltas (Normal vs Attack), and export telemetry for academic publication.
           </p>
         </div>
@@ -53,28 +47,28 @@ export default function ExperimentsPage() {
         {/* Action Buttons */}
         <div className="flex flex-wrap items-center gap-2">
           <button
-            onClick={() => saveCurrentExperiment()}
-            className="flex items-center gap-1.5 px-3 py-2 bg-sky-600 hover:bg-sky-500 text-white rounded-xl text-xs font-semibold shadow-md transition-colors"
+            onClick={() => saveExperiment()}
+            className="flex items-center gap-2 px-3.5 py-2 bg-quantum hover:bg-quantum/90 text-white font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer"
           >
-            <Save className="w-3.5 h-3.5" />
+            <IconSave size={14} />
             <span>Save Current Run</span>
           </button>
 
           <button
-            onClick={exportExperimentsCsv}
+            onClick={exportCsv}
             disabled={experiments.length === 0}
-            className="flex items-center gap-1.5 px-3 py-2 bg-slate-900 hover:bg-slate-800 disabled:opacity-40 border border-slate-700 text-slate-200 rounded-xl text-xs font-semibold transition-colors"
+            className="flex items-center gap-2 px-3.5 py-2 bg-face hover:bg-well disabled:opacity-40 border border-rule text-ink font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer"
           >
-            <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-400" />
+            <IconSave size={14} className="text-pass" />
             <span>Export CSV</span>
           </button>
 
           <button
-            onClick={exportExperimentsJson}
+            onClick={exportJson}
             disabled={experiments.length === 0}
-            className="flex items-center gap-1.5 px-3 py-2 bg-slate-900 hover:bg-slate-800 disabled:opacity-40 border border-slate-700 text-slate-200 rounded-xl text-xs font-semibold transition-colors"
+            className="flex items-center gap-2 px-3.5 py-2 bg-face hover:bg-well disabled:opacity-40 border border-rule text-ink font-bold text-xs uppercase tracking-wider transition-colors cursor-pointer"
           >
-            <FileCode className="w-3.5 h-3.5 text-sky-400" />
+            <IconSave size={14} className="text-quantum" />
             <span>Export JSON</span>
           </button>
         </div>
@@ -82,19 +76,19 @@ export default function ExperimentsPage() {
 
       {/* Side-by-Side Comparison Workbench */}
       {experiments.length >= 2 ? (
-        <div className="bg-slate-950 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800/80 pb-3">
-            <div className="flex items-center gap-2 text-sm font-bold text-white">
-              <ArrowUpDown className="w-4 h-4 text-emerald-400" />
+        <div className="panel p-6 space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-rule pb-3">
+            <div className="flex items-center gap-2 text-sm font-bold text-ink uppercase tracking-wider">
+              <IconExport size={16} className="text-pass" />
               <span>Experiment Differential Benchmark (Exp A vs Exp B)</span>
             </div>
 
             {/* Selectors */}
-            <div className="flex items-center gap-2 text-xs font-mono">
+            <div className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-wider">
               <select
                 value={expA?.id || ''}
                 onChange={(e) => setCompareIdA(e.target.value)}
-                className="bg-slate-900 border border-slate-700 text-slate-200 px-2.5 py-1 rounded-lg"
+                className="bg-face border border-rule text-ink px-2.5 py-1"
               >
                 {experiments.map((e) => (
                   <option key={e.id} value={e.id}>
@@ -103,12 +97,12 @@ export default function ExperimentsPage() {
                 ))}
               </select>
 
-              <span className="text-slate-500">vs</span>
+              <span className="text-ink-muted">vs</span>
 
               <select
                 value={expB?.id || ''}
                 onChange={(e) => setCompareIdB(e.target.value)}
-                className="bg-slate-900 border border-slate-700 text-slate-200 px-2.5 py-1 rounded-lg"
+                className="bg-face border border-rule text-ink px-2.5 py-1"
               >
                 {experiments.map((e) => (
                   <option key={e.id} value={e.id}>
@@ -122,18 +116,18 @@ export default function ExperimentsPage() {
           {/* Differential Comparison Table */}
           {expA && expB && (
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs font-mono">
+              <table className="w-full text-left text-xs font-mono border-collapse">
                 <thead>
-                  <tr className="border-b border-slate-800 text-slate-400 uppercase text-[10px]">
+                  <tr className="border-b-2 border-rule text-ink-muted uppercase tracking-wider font-bold">
                     <th className="py-2.5 px-3">Metric Parameter</th>
-                    <th className="py-2.5 px-3 text-sky-400">Exp A ({expA.attackConfig.type})</th>
-                    <th className="py-2.5 px-3 text-emerald-400">Exp B ({expB.attackConfig.type})</th>
-                    <th className="py-2.5 px-3 text-amber-400">Difference (Δ B - A)</th>
+                    <th className="py-2.5 px-3 text-quantum">Exp A ({expA.attack.type})</th>
+                    <th className="py-2.5 px-3 text-pass">Exp B ({expB.attack.type})</th>
+                    <th className="py-2.5 px-3 text-warn">Difference (Δ B - A)</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-800/60">
+                <tbody className="divide-y divide-rule font-medium">
                   <tr>
-                    <td className="py-2.5 px-3 text-slate-300 font-semibold">Quantum Bit Error Rate (QBER)</td>
+                    <td className="py-2.5 px-3 text-ink font-bold">Quantum Bit Error Rate (QBER)</td>
                     <td className="py-2.5 px-3">{expA.qber.toFixed(2)}%</td>
                     <td className="py-2.5 px-3">{expB.qber.toFixed(2)}%</td>
                     <td className="py-2.5 px-3 font-bold">
@@ -141,7 +135,7 @@ export default function ExperimentsPage() {
                     </td>
                   </tr>
                   <tr>
-                    <td className="py-2.5 px-3 text-slate-300 font-semibold">Quantum State Overlap Fidelity</td>
+                    <td className="py-2.5 px-3 text-ink font-bold">Quantum State Overlap Fidelity</td>
                     <td className="py-2.5 px-3">{(expA.fidelity * 100).toFixed(1)}%</td>
                     <td className="py-2.5 px-3">{(expB.fidelity * 100).toFixed(1)}%</td>
                     <td className="py-2.5 px-3 font-bold">
@@ -149,32 +143,32 @@ export default function ExperimentsPage() {
                     </td>
                   </tr>
                   <tr>
-                    <td className="py-2.5 px-3 text-slate-300 font-semibold">Verification Result</td>
+                    <td className="py-2.5 px-3 text-ink font-bold">Verification Result</td>
                     <td className="py-2.5 px-3">
-                      <span className="px-2 py-0.5 rounded bg-slate-900 border border-slate-800 font-bold">
+                      <span className="px-2 py-0.5 border border-rule bg-face font-bold">
                         {expA.verdict}
                       </span>
                     </td>
                     <td className="py-2.5 px-3">
-                      <span className="px-2 py-0.5 rounded bg-slate-900 border border-slate-800 font-bold">
+                      <span className="px-2 py-0.5 border border-rule bg-face font-bold">
                         {expB.verdict}
                       </span>
                     </td>
-                    <td className="py-2.5 px-3 text-slate-400">
+                    <td className="py-2.5 px-3 text-ink-faint">
                       {expA.verdict === expB.verdict ? 'Identical Verdict' : 'Shifted Status'}
                     </td>
                   </tr>
                   <tr>
-                    <td className="py-2.5 px-3 text-slate-300 font-semibold">Classical Measurement Syndrome</td>
+                    <td className="py-2.5 px-3 text-ink font-bold">Classical Measurement Syndrome</td>
                     <td className="py-2.5 px-3">[{expA.classicalBits[0]}, {expA.classicalBits[1]}]</td>
                     <td className="py-2.5 px-3">[{expB.classicalBits[0]}, {expB.classicalBits[1]}]</td>
-                    <td className="py-2.5 px-3 text-slate-400">-</td>
+                    <td className="py-2.5 px-3 text-ink-faint">-</td>
                   </tr>
                   <tr>
-                    <td className="py-2.5 px-3 text-slate-300 font-semibold">Sampled Shots</td>
+                    <td className="py-2.5 px-3 text-ink font-bold">Sampled Shots</td>
                     <td className="py-2.5 px-3">{expA.shots.toLocaleString()}</td>
                     <td className="py-2.5 px-3">{expB.shots.toLocaleString()}</td>
-                    <td className="py-2.5 px-3 text-slate-400">-</td>
+                    <td className="py-2.5 px-3 text-ink-faint">-</td>
                   </tr>
                 </tbody>
               </table>
@@ -182,33 +176,33 @@ export default function ExperimentsPage() {
           )}
         </div>
       ) : (
-        <div className="bg-slate-950 border border-slate-800 rounded-2xl p-6 text-center space-y-2">
-          <p className="text-xs text-slate-400">
+        <div className="panel p-6 text-center space-y-3 bg-bench">
+          <p className="text-xs text-ink-muted font-bold uppercase tracking-wider">
             Save at least 2 experiment runs to unlock side-by-side differential benchmarking.
           </p>
           <button
-            onClick={() => saveCurrentExperiment()}
-            className="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 border border-slate-700 text-sky-400 rounded-lg text-xs font-mono font-semibold"
+            onClick={() => saveExperiment()}
+            className="px-4 py-2 bg-face hover:bg-well border border-rule text-quantum uppercase tracking-wider text-xs font-mono font-bold transition-colors cursor-pointer inline-flex items-center gap-2"
           >
-            Log First Experiment Now
+            <IconSave size={14} /> Log First Experiment Now
           </button>
         </div>
       )}
 
       {/* Historical Experiments Log Table */}
-      <div className="bg-slate-950 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
-        <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
+      <div className="panel p-6 space-y-4">
+        <div className="flex items-center justify-between border-b border-rule pb-3">
           <div>
-            <h3 className="text-sm font-bold text-white">Historical Experiment Records ({experiments.length})</h3>
-            <p className="text-xs text-slate-400">Saved simulations stored in local session cache.</p>
+            <h3 className="text-sm font-bold text-ink uppercase tracking-wider">Historical Experiment Records ({experiments.length})</h3>
+            <p className="text-xs text-ink-muted font-medium mt-1">Saved simulations stored in local session cache.</p>
           </div>
 
           {experiments.length > 0 && (
             <button
               onClick={clearExperiments}
-              className="flex items-center gap-1 text-xs text-rose-400 hover:text-rose-300 hover:underline font-mono"
+              className="flex items-center gap-1.5 text-xs text-adversary hover:text-adversary/80 uppercase font-bold tracking-wider cursor-pointer transition-colors"
             >
-              <Trash2 className="w-3.5 h-3.5" />
+              <IconTrash size={14} />
               <span>Clear History</span>
             </button>
           )}
@@ -216,9 +210,9 @@ export default function ExperimentsPage() {
 
         {experiments.length > 0 ? (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs font-mono">
+            <table className="w-full text-left text-xs font-mono border-collapse">
               <thead>
-                <tr className="border-b border-slate-800 text-slate-400 uppercase text-[10px]">
+                <tr className="border-b-2 border-rule text-ink-muted uppercase tracking-wider font-bold">
                   <th className="py-2 px-3">Run Name</th>
                   <th className="py-2 px-3">Timestamp</th>
                   <th className="py-2 px-3">Scenario</th>
@@ -228,28 +222,28 @@ export default function ExperimentsPage() {
                   <th className="py-2 px-3 text-right">Action</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/60">
+              <tbody className="divide-y divide-rule font-medium">
                 {experiments.map((e) => (
-                  <tr key={e.id} className="hover:bg-slate-900/40">
-                    <td className="py-2.5 px-3 font-semibold text-slate-200">{e.name}</td>
-                    <td className="py-2.5 px-3 text-slate-400">
+                  <tr key={e.id} className="hover:bg-well transition-colors">
+                    <td className="py-2.5 px-3 font-bold text-ink">{e.name}</td>
+                    <td className="py-2.5 px-3 text-ink-muted">
                       {new Date(e.timestamp).toLocaleTimeString()}
                     </td>
                     <td className="py-2.5 px-3">
-                      <span className="px-2 py-0.5 rounded bg-slate-900 border border-slate-800 text-slate-300">
-                        {e.attackConfig.type}
+                      <span className="px-2 py-0.5 border border-rule bg-face text-ink">
+                        {e.attack.type}
                       </span>
                     </td>
-                    <td className="py-2.5 px-3 font-bold text-slate-200">{e.qber}%</td>
-                    <td className="py-2.5 px-3 font-bold text-slate-200">
+                    <td className="py-2.5 px-3 font-bold text-ink">{e.qber}%</td>
+                    <td className="py-2.5 px-3 font-bold text-ink">
                       {(e.fidelity * 100).toFixed(1)}%
                     </td>
                     <td className="py-2.5 px-3">
                       <span
-                        className={`px-2 py-0.5 rounded font-bold ${
+                        className={`px-2 py-0.5 font-bold uppercase tracking-wider border ${
                           e.verdict === 'VALID'
-                            ? 'bg-emerald-950 text-emerald-300 border border-emerald-800'
-                            : 'bg-rose-950 text-rose-300 border border-rose-800'
+                            ? 'bg-pass-tint text-pass border-pass'
+                            : 'bg-adversary-tint text-adversary border-adversary'
                         }`}
                       >
                         {e.verdict}
@@ -258,10 +252,10 @@ export default function ExperimentsPage() {
                     <td className="py-2.5 px-3 text-right">
                       <button
                         onClick={() => deleteExperiment(e.id)}
-                        className="text-slate-500 hover:text-rose-400 transition-colors"
+                        className="text-ink-faint hover:text-adversary transition-colors cursor-pointer"
                         title="Delete record"
                       >
-                        <Trash2 className="w-3.5 h-3.5" />
+                        <IconTrash size={14} />
                       </button>
                     </td>
                   </tr>
@@ -270,7 +264,7 @@ export default function ExperimentsPage() {
             </table>
           </div>
         ) : (
-          <div className="text-center py-8 text-xs text-slate-500 font-mono">
+          <div className="text-center py-8 text-xs text-ink-faint font-mono font-bold uppercase tracking-wider">
             No experiments logged yet. Click "Save Current Run" to persist benchmark telemetry.
           </div>
         )}

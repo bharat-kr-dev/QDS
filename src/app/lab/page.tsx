@@ -6,7 +6,12 @@ import { BlochSphere } from '../../components/ui/BlochSphere';
 import { HistogramChart } from '../../components/ui/HistogramChart';
 import { HumanContextHelper } from '../../components/ui/HumanContextHelper';
 import { BasisType } from '../../lib/quantum/types';
-import { Atom, Sliders, Play, RefreshCw, Info } from 'lucide-react';
+import {
+  IconQubit,
+  IconSettings,
+  IconReset,
+  IconInfo,
+} from '../../components/icons/Icons';
 
 export default function QuantumLabPage() {
   const {
@@ -14,12 +19,12 @@ export default function QuantumLabPage() {
     inputQubit,
     setInputFromAngles,
     setInputPreset,
-    shotsCount,
-    setShotsCount,
+    shots,
+    setShots,
   } = useQuantum();
 
   const [selectedBasis, setSelectedBasis] = useState<BasisType>('Z');
-  const bloch = inputState.getSingleQubitBloch();
+  const bloch = inputState.getBloch();
 
   // Slider angle state in degrees
   const thetaDeg = Math.round((bloch.theta * 180) / Math.PI);
@@ -36,7 +41,7 @@ export default function QuantumLabPage() {
   };
 
   // Run projective measurement simulation
-  const measurementResult = inputState.measure(selectedBasis, shotsCount);
+  const measurementResult = inputState.measure(selectedBasis, shots, Math.random);
 
   // Human explanation of probabilities
   const p0Pct = (bloch.p0 * 100).toFixed(1);
@@ -45,16 +50,16 @@ export default function QuantumLabPage() {
   return (
     <div className="space-y-8">
       {/* Page Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-950 border border-slate-800 rounded-2xl p-6">
+      <div className="panel p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-sky-950/80 border border-sky-800 text-[11px] font-mono text-sky-400 mb-1.5">
-            <Atom className="w-3.5 h-3.5" />
+          <div className="inline-flex items-center gap-2 px-2.5 py-0.5 border border-quantum bg-quantum-tint text-[10px] font-mono font-bold text-quantum uppercase tracking-wider mb-2">
+            <IconQubit size={12} />
             Interactive Quantum State Workspace
           </div>
-          <h1 className="text-xl lg:text-2xl font-bold text-white tracking-tight">
+          <h1 className="text-xl lg:text-2xl font-bold text-ink tracking-tight uppercase font-sans">
             Quantum Lab: Qubit State Engineering
           </h1>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-ink-muted mt-1 font-medium">
             Construct arbitrary single-qubit superpositions, rotate on the 3D Bloch sphere, and sample multi-basis projective measurements.
           </p>
         </div>
@@ -63,37 +68,37 @@ export default function QuantumLabPage() {
         <div className="flex flex-wrap items-center gap-1.5">
           <button
             onClick={() => setInputPreset('zero')}
-            className="px-2.5 py-1.5 bg-slate-900 hover:bg-slate-800 border border-slate-700 rounded-lg text-xs font-mono font-semibold text-slate-200 transition-colors"
+            className="px-2.5 py-1.5 bg-face hover:bg-well border border-rule text-ink text-xs font-mono font-bold uppercase tracking-wider transition-colors cursor-pointer"
           >
             |0⟩
           </button>
           <button
             onClick={() => setInputPreset('one')}
-            className="px-2.5 py-1.5 bg-slate-900 hover:bg-slate-800 border border-slate-700 rounded-lg text-xs font-mono font-semibold text-slate-200 transition-colors"
+            className="px-2.5 py-1.5 bg-face hover:bg-well border border-rule text-ink text-xs font-mono font-bold uppercase tracking-wider transition-colors cursor-pointer"
           >
             |1⟩
           </button>
           <button
             onClick={() => setInputPreset('plus')}
-            className="px-2.5 py-1.5 bg-slate-900 hover:bg-slate-800 border border-slate-700 rounded-lg text-xs font-mono font-semibold text-slate-200 transition-colors"
+            className="px-2.5 py-1.5 bg-face hover:bg-well border border-rule text-ink text-xs font-mono font-bold uppercase tracking-wider transition-colors cursor-pointer"
           >
             |+⟩
           </button>
           <button
             onClick={() => setInputPreset('minus')}
-            className="px-2.5 py-1.5 bg-slate-900 hover:bg-slate-800 border border-slate-700 rounded-lg text-xs font-mono font-semibold text-slate-200 transition-colors"
+            className="px-2.5 py-1.5 bg-face hover:bg-well border border-rule text-ink text-xs font-mono font-bold uppercase tracking-wider transition-colors cursor-pointer"
           >
             |-⟩
           </button>
           <button
             onClick={() => setInputPreset('plusI')}
-            className="px-2.5 py-1.5 bg-slate-900 hover:bg-slate-800 border border-slate-700 rounded-lg text-xs font-mono font-semibold text-slate-200 transition-colors"
+            className="px-2.5 py-1.5 bg-face hover:bg-well border border-rule text-ink text-xs font-mono font-bold uppercase tracking-wider transition-colors cursor-pointer"
           >
             |+i⟩
           </button>
           <button
-            onClick={() => setInputPreset('custom70_30')}
-            className="px-2.5 py-1.5 bg-sky-950 hover:bg-sky-900 border border-sky-800 rounded-lg text-xs font-mono font-semibold text-sky-300 transition-colors"
+            onClick={() => setInputPreset('weighted')}
+            className="px-2.5 py-1.5 bg-quantum-tint hover:bg-quantum text-quantum hover:text-white border border-quantum text-xs font-mono font-bold uppercase tracking-wider transition-colors cursor-pointer"
           >
             70% |0⟩ : 30% |1⟩
           </button>
@@ -103,12 +108,12 @@ export default function QuantumLabPage() {
       {/* Main Grid: Bloch Sphere & State Controls */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left: 3D Bloch Sphere */}
-        <div className="lg:col-span-5 bg-slate-950 border border-slate-800 rounded-2xl p-6 shadow-xl flex flex-col items-center">
-          <div className="w-full flex items-center justify-between mb-3">
-            <span className="text-xs font-mono text-slate-400 uppercase tracking-wider">
+        <div className="lg:col-span-5 panel p-6 flex flex-col items-center">
+          <div className="w-full flex items-center justify-between mb-3 border-b border-rule pb-3">
+            <span className="text-[11px] font-mono font-bold text-ink-muted uppercase tracking-wider">
               3D Bloch Sphere Geometry
             </span>
-            <span className="text-[10px] font-mono text-sky-400 bg-sky-950 px-2 py-0.5 rounded border border-sky-800">
+            <span className="text-[10px] font-mono font-bold text-quantum bg-quantum-tint border border-quantum px-2 py-0.5 uppercase tracking-wider">
               Unit Radius |r|=1
             </span>
           </div>
@@ -116,13 +121,13 @@ export default function QuantumLabPage() {
           <BlochSphere bloch={bloch} size={290} label="|ψ⟩" />
 
           {/* Natural Language Interpretation */}
-          <div className="mt-4 w-full bg-slate-900/90 border border-slate-800 rounded-xl p-3.5 text-xs text-slate-300 space-y-1.5">
-            <div className="flex items-center gap-1.5 text-sky-400 font-semibold font-mono">
-              <Info className="w-3.5 h-3.5" />
+          <div className="mt-4 w-full bg-well border border-rule p-4 text-xs text-ink space-y-1.5">
+            <div className="flex items-center gap-1.5 text-quantum font-bold font-mono uppercase tracking-wider text-[10px]">
+              <IconInfo size={14} />
               Human Explanation:
             </div>
-            <p className="leading-relaxed">
-              This qubit has a <strong className="text-emerald-400">{p0Pct}%</strong> probability of being measured as <span className="font-mono text-white">|0⟩</span> and a <strong className="text-sky-400">{p1Pct}%</strong> probability of being measured as <span className="font-mono text-white">|1⟩</span> in the computational Z-basis.
+            <p className="leading-relaxed font-medium">
+              This qubit has a <strong className="text-pass">{p0Pct}%</strong> probability of being measured as <span className="font-mono text-quantum font-bold">|0⟩</span> and a <strong className="text-quantum">{p1Pct}%</strong> probability of being measured as <span className="font-mono text-pass font-bold">|1⟩</span> in the computational Z-basis.
             </p>
           </div>
         </div>
@@ -130,41 +135,41 @@ export default function QuantumLabPage() {
         {/* Right: State Vector & Probability Sliders */}
         <div className="lg:col-span-7 space-y-6">
           {/* Dirac Ket State Representation */}
-          <div className="bg-slate-950 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-white">Dirac Ket Notation</h3>
-              <span className="text-[11px] font-mono text-emerald-400 bg-emerald-950/80 px-2 py-0.5 rounded border border-emerald-800">
+          <div className="panel p-6 space-y-4">
+            <div className="flex items-center justify-between border-b border-rule pb-3">
+              <h3 className="text-sm font-bold text-ink uppercase tracking-wider">Dirac Ket Notation</h3>
+              <span className="text-[10px] font-mono font-bold text-pass bg-pass-tint border border-pass px-2 py-0.5 uppercase tracking-wider">
                 Normalized: |α|² + |β|² = 1.000
               </span>
             </div>
 
-            <div className="bg-slate-900 border border-slate-800 rounded-xl p-4 font-mono text-sm sm:text-base text-sky-300 overflow-x-auto">
-              {inputQubit.ketString}
+            <div className="bg-well border border-rule p-4 font-mono text-sm sm:text-base font-bold text-quantum overflow-x-auto text-center">
+              {inputQubit.ket}
             </div>
 
             {/* Probability Bars */}
-            <div className="space-y-3 pt-2">
+            <div className="space-y-4 pt-2">
               <div>
-                <div className="flex justify-between text-xs font-mono text-slate-400 mb-1">
+                <div className="flex justify-between text-[11px] font-mono font-bold text-ink-muted uppercase tracking-wider mb-1">
                   <span>Probability P(|0⟩) = |α|²</span>
-                  <span className="text-white font-bold">{p0Pct}% ({bloch.p0})</span>
+                  <span className="text-pass font-bold">{p0Pct}% ({bloch.p0})</span>
                 </div>
-                <div className="h-3 bg-slate-900 rounded-full overflow-hidden border border-slate-800">
+                <div className="h-3 bg-well rounded-none border border-rule overflow-hidden">
                   <div
-                    className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 transition-all duration-200"
+                    className="h-full bg-pass transition-all duration-200"
                     style={{ width: `${bloch.p0 * 100}%` }}
                   />
                 </div>
               </div>
 
               <div>
-                <div className="flex justify-between text-xs font-mono text-slate-400 mb-1">
+                <div className="flex justify-between text-[11px] font-mono font-bold text-ink-muted uppercase tracking-wider mb-1">
                   <span>Probability P(|1⟩) = |β|²</span>
-                  <span className="text-white font-bold">{p1Pct}% ({bloch.p1})</span>
+                  <span className="text-quantum font-bold">{p1Pct}% ({bloch.p1})</span>
                 </div>
-                <div className="h-3 bg-slate-900 rounded-full overflow-hidden border border-slate-800">
+                <div className="h-3 bg-well rounded-none border border-rule overflow-hidden">
                   <div
-                    className="h-full bg-gradient-to-r from-sky-500 to-indigo-500 transition-all duration-200"
+                    className="h-full bg-quantum transition-all duration-200"
                     style={{ width: `${bloch.p1 * 100}%` }}
                   />
                 </div>
@@ -173,17 +178,17 @@ export default function QuantumLabPage() {
           </div>
 
           {/* Angle Sliders */}
-          <div className="bg-slate-950 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
-            <div className="flex items-center gap-2 text-sm font-semibold text-white">
-              <Sliders className="w-4 h-4 text-sky-400" />
+          <div className="panel p-6 space-y-4 bg-bench">
+            <div className="flex items-center gap-2 text-sm font-bold text-ink uppercase tracking-wider border-b border-rule pb-3">
+              <IconSettings size={16} className="text-quantum" />
               <span>Spherical Polar Coordinates</span>
             </div>
 
             {/* Theta slider */}
-            <div className="space-y-1.5">
-              <div className="flex justify-between text-xs font-mono">
-                <span className="text-slate-400">Polar Angle θ (0° = North pole |0⟩, 180° = South pole |1⟩):</span>
-                <span className="text-sky-400 font-bold">{thetaDeg}°</span>
+            <div className="space-y-1.5 p-3 bg-face border border-rule">
+              <div className="flex justify-between text-[11px] font-mono font-bold text-ink-muted uppercase tracking-wider">
+                <span>Polar Angle θ (0° = North pole |0⟩, 180° = South pole |1⟩):</span>
+                <span className="text-quantum font-bold">{thetaDeg}°</span>
               </div>
               <input
                 type="range"
@@ -192,15 +197,15 @@ export default function QuantumLabPage() {
                 step="1"
                 value={thetaDeg}
                 onChange={(e) => handleThetaChange(Number(e.target.value))}
-                className="w-full accent-sky-500 cursor-pointer"
+                className="w-full cursor-pointer"
               />
             </div>
 
             {/* Phi slider */}
-            <div className="space-y-1.5">
-              <div className="flex justify-between text-xs font-mono">
-                <span className="text-slate-400">Azimuthal Phase Angle φ (Equatorial Rotation 0° to 360°):</span>
-                <span className="text-amber-400 font-bold">{phiDeg}°</span>
+            <div className="space-y-1.5 p-3 bg-face border border-rule">
+              <div className="flex justify-between text-[11px] font-mono font-bold text-ink-muted uppercase tracking-wider">
+                <span>Azimuthal Phase Angle φ (Equatorial Rotation 0° to 360°):</span>
+                <span className="text-warn font-bold">{phiDeg}°</span>
               </div>
               <input
                 type="range"
@@ -209,7 +214,7 @@ export default function QuantumLabPage() {
                 step="1"
                 value={phiDeg}
                 onChange={(e) => handlePhiChange(Number(e.target.value))}
-                className="w-full accent-amber-500 cursor-pointer"
+                className="w-full cursor-pointer"
               />
             </div>
           </div>
@@ -218,64 +223,64 @@ export default function QuantumLabPage() {
 
       {/* Projective Measurement Station */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <div className="lg:col-span-4 bg-slate-950 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-white">Projective Basis Selector</h3>
-            <RefreshCw className="w-3.5 h-3.5 text-slate-400" />
+        <div className="lg:col-span-4 panel p-6 space-y-4">
+          <div className="flex items-center justify-between border-b border-rule pb-3">
+            <h3 className="text-sm font-bold text-ink uppercase tracking-wider">Projective Basis Selector</h3>
+            <IconReset size={14} className="text-ink-muted" />
           </div>
 
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-ink-muted font-medium">
             Select a measurement basis to collapse the state vector according to Born’s Rule.
           </p>
 
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-2">
             <button
               onClick={() => setSelectedBasis('Z')}
-              className={`py-2 px-3 rounded-xl text-xs font-mono font-bold border transition-all ${
+              className={`py-2 px-3 text-[10px] font-mono font-bold border transition-colors cursor-pointer uppercase tracking-wider ${
                 selectedBasis === 'Z'
-                  ? 'bg-sky-600 border-sky-400 text-white shadow-md'
-                  : 'bg-slate-900 border-slate-800 text-slate-300 hover:bg-slate-800'
+                  ? 'bg-quantum border-quantum text-white'
+                  : 'bg-face border-rule text-ink hover:bg-well'
               }`}
             >
-              Z-Basis (|0⟩, |1⟩)
+              Z-Basis
             </button>
             <button
               onClick={() => setSelectedBasis('X')}
-              className={`py-2 px-3 rounded-xl text-xs font-mono font-bold border transition-all ${
+              className={`py-2 px-3 text-[10px] font-mono font-bold border transition-colors cursor-pointer uppercase tracking-wider ${
                 selectedBasis === 'X'
-                  ? 'bg-emerald-600 border-emerald-400 text-white shadow-md'
-                  : 'bg-slate-900 border-slate-800 text-slate-300 hover:bg-slate-800'
+                  ? 'bg-pass border-pass text-white'
+                  : 'bg-face border-rule text-ink hover:bg-well'
               }`}
             >
-              X-Basis (|+⟩, |-⟩)
+              X-Basis
             </button>
             <button
               onClick={() => setSelectedBasis('Y')}
-              className={`py-2 px-3 rounded-xl text-xs font-mono font-bold border transition-all ${
+              className={`py-2 px-3 text-[10px] font-mono font-bold border transition-colors cursor-pointer uppercase tracking-wider ${
                 selectedBasis === 'Y'
-                  ? 'bg-pink-600 border-pink-400 text-white shadow-md'
-                  : 'bg-slate-900 border-slate-800 text-slate-300 hover:bg-slate-800'
+                  ? 'bg-adversary border-adversary text-white'
+                  : 'bg-face border-rule text-ink hover:bg-well'
               }`}
             >
-              Y-Basis (|i⟩, |-i⟩)
+              Y-Basis
             </button>
           </div>
 
           {/* Shot Count Preset */}
-          <div className="space-y-1.5 pt-2 border-t border-slate-800/80">
-            <span className="text-xs font-mono text-slate-400">Measurement Shots:</span>
+          <div className="space-y-1.5 pt-4 border-t border-rule">
+            <span className="text-[10px] font-mono font-bold text-ink-muted uppercase tracking-wider">Measurement Shots:</span>
             <div className="grid grid-cols-3 gap-2">
-              {[100, 1000, 10000].map((shots) => (
+              {[100, 1000, 10000].map((s) => (
                 <button
-                  key={shots}
-                  onClick={() => setShotsCount(shots)}
-                  className={`py-1.5 px-2 rounded-lg text-xs font-mono border transition-all ${
-                    shotsCount === shots
-                      ? 'bg-slate-800 border-sky-400 text-sky-300 font-bold'
-                      : 'bg-slate-900 border-slate-800 text-slate-400 hover:text-slate-200'
+                  key={s}
+                  onClick={() => setShots(s)}
+                  className={`py-1.5 px-2 text-[10px] font-mono font-bold border transition-colors cursor-pointer uppercase tracking-wider ${
+                    shots === s
+                      ? 'bg-quantum-tint border-quantum text-quantum'
+                      : 'bg-face border-rule text-ink-muted hover:text-ink hover:bg-well'
                   }`}
                 >
-                  {shots.toLocaleString()}
+                  {s.toLocaleString()}
                 </button>
               ))}
             </div>
